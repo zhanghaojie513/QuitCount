@@ -1,6 +1,6 @@
 # 戒烟有数后端分阶段实施计划
 
-> 状态：执行草案，2026-07-14。NestJS 11 最小工程已按用户指示提前初始化并安装依赖；数据库迁移、容器/CI、OpenAPI 实现和领域业务尚未开始。未完成的命令仍是后续阶段建议，不得据此宣称对应阶段完成。
+> 状态：执行记录，2026-07-15。Stage 0 已完成；Stage 1 工程、质量、OpenAPI diff、容器和 CI 配置已实现，本机因缺少 Docker CLI 未完成容器运行，远端 GitHub Actions 也未触发。数据库迁移和领域业务尚未开始。
 
 ## 1. 计划目标与边界
 
@@ -33,8 +33,8 @@
 
 ## 2. 全阶段工作清单
 
-- [ ] Stage 0：文档、ADR、OpenAPI 草案和可行性。
-- [ ] Stage 1：NestJS 工程与质量门禁（最小工程与本地 lint/typecheck/test/E2E/build/启动验证已完成；容器、CI、覆盖率与 OpenAPI 门禁未完成）。
+- [x] Stage 0：文档、ADR、OpenAPI 草案和可行性（报告：[`backend_phase_000_contract_report.md`](./reports/backend_phase_000_contract_report.md)）。
+- [ ] Stage 1：NestJS 工程与质量门禁（实现和本地门禁已完成；容器运行/优雅退出及远端 CI 待补验，报告：[`backend_phase_001_project_quality_report.md`](./reports/backend_phase_001_project_quality_report.md)）。
 - [ ] Stage 2：配置、数据库、迁移、健康检查和日志。
 - [ ] Stage 3：账户与认证，仍不强迫 Harmony 首版登录。
 - [ ] Stage 4：资产、目标和设置 API。
@@ -49,18 +49,18 @@
 
 - **目标**：冻结事实边界、术语、主要 API、错误码、模型与同步策略，先消除会导致返工的开放决策。
 - **输入**：本三份后端文档；`QuitCountHarmony/docs/product_spec.md`；指定 Harmony 源码与 Phase 5/6/8 报告。
-- **依赖**：无。这是从空目录开始的推荐下一步。
+- **依赖**：无。已于 2026-07-15 完成 Stage 0 自动门禁；开放决策按 ADR 的后续阶段截止点继续跟踪。
 
 ### 实现内容与文件范围
 
-- [ ] 建立 `docs/adr/`，完成 ADR-001 至 ADR-009 的 proposed/accepted 状态与责任人。
-- [ ] 创建 `openapi/backend-v1.yaml`，覆盖认证、设备、资产、账本、目标、设置、sync、privacy。
-- [ ] 建立错误码目录、字段词汇表、金额/时间/自然日/模型版本约定。
-- [ ] 固定首期 OpenAPI 3.0.3；若业务要求 3.1，先以 ADR 验证 Nest 生成、lint、breaking diff 与 Harmony client 工具链。
-- [ ] 用 Harmony fixtures 演示 take、return、retire、重复 push、乱序依赖、默认资产冲突、墓碑和游标过期。
-- [ ] 完成 ADR-010（资产双版本与默认资产用户行锁）和 ADR-011（bootstrap 水位、永久事件去重与依赖组事务）。
-- [ ] 完成威胁建模与数据分类，确认哪些本地字段可在用户授权后上传。
-- [ ] 决定 Node/Nest/PostgreSQL 主版本、Prisma vs TypeORM；认证供应商、部署平台仍可标记待确认，但不得伪造。
+- [x] 建立 `docs/adr/`，完成 ADR-001 至 ADR-011 的状态、责任角色和截止门禁。
+- [x] 创建 `openapi/backend-v1.yaml`，覆盖认证、设备、资产、账本、目标、设置、sync、privacy。
+- [x] 建立错误码目录、字段词汇表、金额/时间/自然日/模型版本约定。
+- [x] 固定首期 OpenAPI 3.0.3；若业务要求 3.1，先以 ADR 验证 Nest 生成、lint、breaking diff 与 Harmony client 工具链。
+- [x] 用 Harmony fixtures 演示 take、return、retire、重复 push、乱序依赖、默认资产冲突、墓碑和游标过期。
+- [x] 完成 ADR-010（资产双版本与默认资产用户行锁）和 ADR-011（bootstrap 水位、永久事件去重与依赖组事务）。
+- [x] 完成威胁建模与数据分类，确认只有在用户明确授权同步后才可上传 P3/P4 本地数据。
+- [x] 决定 Node 24/NestJS 11/PostgreSQL 18/Prisma/OpenAPI 3.0.3 基线；认证供应商、部署平台保持待确认且未被虚构。
 
 建议范围：`docs/backend_*.md`、`docs/adr/*.md`、`openapi/backend-v1.yaml`、`openapi/examples/*.json`、`docs/error_catalog.md`。
 
@@ -70,20 +70,21 @@
 
 ### 测试与验证命令
 
-未来在 Stage 1 脚本就绪后使用；Stage 0 可先选用固定版本工具运行：
+Stage 0 已建立并实际运行以下固定版本工具链：
 
 ```powershell
 npm run docs:lint
 npm run openapi:lint
-npm run openapi:breaking -- --base origin/main
+npm run openapi:validate
 npm run contract:examples
+npm run stage0:verify
 ```
 
 还需人工检查：所有 Harmony 字段都有映射；每个错误码有触发条件和客户端处理；文档内部链接有效；建议/事实/待确认标记一致。
 
 ### 完成定义、风险与回滚
 
-- **完成定义**：OpenAPI 3.0.3 lint 通过；关键 JSON fixture 可校验；ADR-001 至 ADR-011 有明确状态；未决项有 owner/截止点；规格—Harmony—API 差异表评审通过；生成 Stage 0 报告。
+- **完成定义（已达到）**：OpenAPI 3.0.3 lint 通过；8 个关键 JSON fixture 可校验；ADR-001 至 ADR-011 有明确状态；未决项有责任角色/截止门禁；规格—Harmony—API 差异表已形成；Stage 0 报告已生成。首份契约没有已发布基线，breaking diff 记为不适用；发布基线建立后成为强制门禁。
 - **主要风险**：过早锁死认证或 ORM；历史 return 无法可靠关联；金额迁移舍入不明确。
 - **回滚**：本阶段无运行状态；撤回未批准 ADR/OpenAPI 变更并恢复上一版文档。已发布契约不得直接改写，需新版本或兼容修订。
 
@@ -99,10 +100,10 @@ npm run contract:examples
 
 - [x] 使用 `mise` Node.js `24.16.0` + npm `11.13.0` 初始化 NestJS 11 TypeScript 工程，固定 lockfile、`.node-version`、`packageManager` 和 engines。
 - [x] 验证当前核心运行包 `@nestjs/common`、`@nestjs/core`、`@nestjs/platform-express` 为 `11.1.28`；后续只使用 NestJS 11 支持且未废弃的 API。
-- [ ] 建立 `src/main.ts`、`src/app.module.ts`、`src/common/`、`src/config/`、`src/modules/`、`test/`。
-- [ ] 配置严格 TypeScript、ESLint、Prettier、单元/E2E、覆盖率阈值与提交前/CI 门禁。
-- [ ] 增加非 root 多阶段 Dockerfile、`.dockerignore`、本地 Compose 骨架和最小 CI。
-- [ ] 建立 OpenAPI 3.0.3 生成/比对脚本，但不声称 DTO 已实现完整业务契约。
+- [x] 建立 `src/main.ts`、`src/app.module.ts`、`src/common/`、`src/config/`、`src/modules/`、`test/`；未加入领域业务。
+- [x] 配置严格 TypeScript、ESLint、Prettier、单元/E2E、覆盖率阈值与统一 `precommit:verify`/`ci:verify` 门禁。
+- [x] 增加非 root 多阶段 Dockerfile、`.dockerignore`、只读/降权 Compose 骨架和最小 GitHub Actions CI；本机静态校验通过，运行验证待 Docker 环境。
+- [x] 建立 OpenAPI 3.0.3 bundle、Stage 0 baseline 和保守 breaking diff 脚本；不声称 Nest DTO 已实现业务契约。
 
 建议范围：`package.json`、lockfile、`nest-cli.json`、`tsconfig*.json`、`eslint.config.*`、`src/` 骨架、`test/`、`Dockerfile`、`compose.yaml`、CI 配置。
 
@@ -114,17 +115,16 @@ npm run contract:examples
 
 ```powershell
 npm ci
-npm run lint
-npm run typecheck
-npm test
-npm run test:e2e
-npm run build
+npm run ci:verify
+npm run openapi:bundle
+npm audit --audit-level=high --registry=https://registry.npmjs.org
 docker build -t quit-count-api:stage1 .
+docker run --rm --name quit-count-api -p 3000:3000 quit-count-api:stage1
 ```
 
 ### 完成定义、风险与回滚
 
-- **完成定义**：干净环境 `npm ci` 可重现；lint/typecheck/test/build 全绿；容器以非 root 启动并优雅退出；CI 与本地脚本一致；生成 Stage 1 报告。
+- **完成定义（部分达到）**：干净 `npm ci`、本地 `ci:verify`、覆盖率、OpenAPI bundle/diff、依赖审计和构建全绿；容器配置静态证明非 root/只读/降权，并使用 NestJS 11 `enableShutdownHooks()`。本机没有 Docker CLI，尚未实际构建、启动和发送终止信号；远端 workflow 未触发，因此 Stage 1 保持未完成状态。
 - **主要风险**：Node/依赖版本漂移、Windows 与 Linux 脚本差异、无意义覆盖率造假。
 - **回滚**：移除 Stage 1 新工程文件或回退到最后绿色提交；无数据库/外部状态需要回滚。
 
@@ -453,7 +453,7 @@ npm run image:smoke
 
 | 决策 | 最晚确认阶段 | 未确认时处理 |
 | --- | --- | --- |
-| Node/Nest/PostgreSQL/ORM、OpenAPI 3.0.3 基线 | Stage 0 | 不初始化工程。 |
+| Node/Nest/PostgreSQL/ORM、OpenAPI 3.0.3 基线 | Stage 0 | 已由 ADR-002/003 和 OpenAPI 草案确认；Stage 2 复核真实托管兼容性。 |
 | 认证方式与供应商 | Stage 3 前 | 只做 provider-neutral 契约，不发送验证码。 |
 | 金额币种与舍入 | Stage 4 前 | 不导入历史金额。 |
 | 跨日 return、goal 范围 | Stage 5 前 | 契约标记未决，不实现猜测规则。 |
@@ -461,8 +461,8 @@ npm run image:smoke
 | 删除冷静期、法定保留、RPO/RTO | Stage 7 前 | 高风险流程保持关闭。 |
 | 域名、地区、CI/CD、部署平台、SLO | Stage 8 前 | 只在本地/临时测试环境验证，不宣称上线。 |
 
-## 5. 本轮后的下一步（仅建议，不执行）
+## 5. Stage 0 后的下一步（仅建议，不执行）
 
-从 **Stage 0** 开始：评审三份文档，以 OpenAPI 3.0.3 创建 `openapi/backend-v1.yaml` 草案，完成资产双版本/用户行锁、永久事件去重和 bootstrap 水位 ADR，并决定 ORM、PostgreSQL 主版本、认证路径、金额迁移和同步冲突 UX。Stage 0 通过前不要运行 `nest new`、`npm install` 或创建数据库资源。
+Stage 0 已完成，Stage 1 实现已落地。下一步仅补验 **Stage 1 运行门禁**：在可用 Docker 环境构建/启动非 root 镜像并验证终止信号，在实际仓库触发 CI workflow。补验通过并评审报告前不进入 Stage 2。
 
-本轮交付到此为止，**本轮不执行**上述下一步。
+本轮不安装 Docker Desktop、不推送仓库、不触发外部 CI，也不进入 Stage 2。

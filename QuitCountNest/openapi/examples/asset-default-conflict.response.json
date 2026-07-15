@@ -1,0 +1,10 @@
+{
+  "code": "ASSET_DEFAULT_CONFLICT",
+  "message": "默认资产已被其他设备更新，请采用服务端当前值",
+  "requestId": "req_01JZDEFAULTCONFLICT000000001",
+  "retryable": false,
+  "details": {
+    "canonicalDefaultAssetId": "0190d1d4-4c45-7d28-a413-9f82e88f3273",
+    "currentProfileVersion": 5
+  }
+}

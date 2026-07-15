@@ -1,0 +1,14 @@
+{
+  "clientMutationId": "harmony-01JZRETIRE0000000000000001",
+  "deviceId": "0190d1d4-4c45-7d28-a413-9f82e88f3270",
+  "assetId": "0190d1d4-4c45-7d28-a413-9f82e88f3271",
+  "action": "retire",
+  "cigarettes": 12,
+  "batchId": "0190d1d4-4c45-7d28-a413-9f82e88f3279",
+  "occurredAt": "2026-07-15T20:00:00+08:00",
+  "localDate": "2026-07-15",
+  "timezoneOffsetMinutes": 480,
+  "scene": "清理库存",
+  "note": "",
+  "modelVersion": "quit-risk/1.0.0"
+}

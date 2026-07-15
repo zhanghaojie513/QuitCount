@@ -1,0 +1,13 @@
+{
+  "clientMutationId": "harmony-01JZTAKE000000000000000001",
+  "deviceId": "0190d1d4-4c45-7d28-a413-9f82e88f3270",
+  "assetId": "0190d1d4-4c45-7d28-a413-9f82e88f3271",
+  "action": "take",
+  "cigarettes": 1,
+  "occurredAt": "2026-07-15T12:10:00+08:00",
+  "localDate": "2026-07-15",
+  "timezoneOffsetMinutes": 480,
+  "scene": "工作间隙",
+  "note": "",
+  "modelVersion": "quit-risk/1.0.0"
+}

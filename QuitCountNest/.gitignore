@@ -5,6 +5,7 @@
 /dist
 /coverage
 .eslintcache
+/openapi/generated
 
 # environment files
 .env

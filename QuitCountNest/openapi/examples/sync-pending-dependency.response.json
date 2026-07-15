@@ -1,0 +1,12 @@
+{
+  "results": [
+    {
+      "clientMutationId": "harmony-01JZRETURN0000000000000001",
+      "status": "pending_dependency",
+      "canonicalId": null,
+      "code": "LEDGER_DEPENDENCY_PENDING",
+      "currentVersion": null
+    }
+  ],
+  "serverTime": "2026-07-15T04:12:03Z"
+}

@@ -1,0 +1,14 @@
+{
+  "changes": [],
+  "tombstones": [
+    {
+      "changeSeq": 1042,
+      "resourceType": "asset",
+      "resourceId": "0190d1d4-4c45-7d28-a413-9f82e88f3271",
+      "deletedAt": "2026-07-15T04:20:00Z"
+    }
+  ],
+  "nextCursor": "opaque_cursor_after_1042",
+  "hasMore": false,
+  "serverTime": "2026-07-15T04:20:01Z"
+}

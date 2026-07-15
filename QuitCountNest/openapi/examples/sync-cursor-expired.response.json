@@ -1,0 +1,9 @@
+{
+  "code": "SYNC_CURSOR_EXPIRED",
+  "message": "同步游标已超过保留窗口，请重新执行 bootstrap",
+  "requestId": "req_01JZCURSOREXPIRED000000001",
+  "retryable": false,
+  "details": {
+    "requiredAction": "bootstrap"
+  }
+}

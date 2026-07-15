@@ -1,0 +1,1461 @@
+openapi: 3.0.3
+info:
+  title: QuitCount Backend API
+  version: 0.1.0-draft
+  description: |
+    戒烟有数后端 Stage 0 契约草案。Harmony 客户端保持本地先写；未明确启用同步前不上传本地数据。
+    健康指标非医学诊断，仅用于行为反馈和自我管理。当前没有已部署域名或环境。
+  contact:
+    name: Backend maintainers (role, assignee pending)
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development placeholder
+tags:
+  - name: Health
+    description: Liveness and readiness probes; no user data.
+  - name: Auth
+    description: Provider-neutral session lifecycle pending ADR-007.
+  - name: Users
+    description: Current authenticated account state.
+  - name: Devices
+    description: Registered client instances and session revocation.
+  - name: Assets
+    description: Cigarette asset profiles and canonical stock materialization.
+  - name: Ledger
+    description: Append-only take, return, and retire events.
+  - name: Goals
+    description: Versioned smoking-reduction goals.
+  - name: Settings
+    description: Synchronizable preferences; phone executes local notifications.
+  - name: Sync
+    description: Local-first bootstrap, idempotent push, and incremental pull.
+  - name: Privacy
+    description: High-risk cloud export and account deletion jobs.
+security:
+  - bearerAuth: []
+paths:
+  /health/live:
+    get:
+      tags: [Health]
+      operationId: getLiveness
+      security: []
+      responses:
+        '200':
+          description: Process is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /health/ready:
+    get:
+      tags: [Health]
+      operationId: getReadiness
+      security: []
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /auth/sessions:
+    post:
+      tags: [Auth]
+      operationId: createSession
+      security: []
+      description: Proposed abstraction until ADR-007 selects login strategy/provider.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /auth/sessions/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshSession
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshSessionRequest'
+      responses:
+        '200':
+          description: Rotated session tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/sessions/current:
+    delete:
+      tags: [Auth]
+      operationId: revokeCurrentSession
+      responses:
+        '204':
+          description: Current session revoked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/me:
+    get:
+      tags: [Users]
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /devices:
+    get:
+      tags: [Devices]
+      operationId: listDevices
+      responses:
+        '200':
+          description: Registered devices
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Device'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Devices]
+      operationId: registerDevice
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+      responses:
+        '201':
+          description: Device registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /devices/{deviceId}:
+    delete:
+      tags: [Devices]
+      operationId: revokeDevice
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      responses:
+        '204':
+          description: Device and its refresh sessions revoked
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /assets:
+    get:
+      tags: [Assets]
+      operationId: listAssets
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Cursor-paginated assets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetPage'
+    post:
+      tags: [Assets]
+      operationId: createAsset
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAssetRequest'
+      responses:
+        '201':
+          description: Asset created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /assets/{assetId}:
+    parameters:
+      - $ref: '#/components/parameters/AssetId'
+    get:
+      tags: [Assets]
+      operationId: getAsset
+      responses:
+        '200':
+          description: Asset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Assets]
+      operationId: updateAssetProfile
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAssetProfileRequest'
+      responses:
+        '200':
+          description: Updated asset profile; stock is never directly writable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags: [Assets]
+      operationId: archiveAsset
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '204':
+          description: Asset soft-deleted; history remains referentially intact
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /assets/{assetId}/default:
+    put:
+      tags: [Assets]
+      operationId: setDefaultAsset
+      parameters:
+        - $ref: '#/components/parameters/AssetId'
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetDefaultAssetRequest'
+      responses:
+        '200':
+          description: Canonical default asset after user-row-locked transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /ledger-events:
+    get:
+      tags: [Ledger]
+      operationId: listLedgerEvents
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: localDate
+          in: query
+          schema:
+            $ref: '#/components/schemas/LocalDate'
+      responses:
+        '200':
+          description: Immutable ledger events in stable descending order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedgerEventPage'
+    post:
+      tags: [Ledger]
+      operationId: appendLedgerEvent
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/TakeEventRequest'
+                - $ref: '#/components/schemas/ReturnEventRequest'
+                - $ref: '#/components/schemas/RetireEventRequest'
+              discriminator:
+                propertyName: action
+      responses:
+        '201':
+          description: Event appended and inventory materialization updated atomically
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedgerEvent'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+  /goals/current:
+    get:
+      tags: [Goals]
+      operationId: getCurrentGoal
+      responses:
+        '200':
+          description: Current goal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+    put:
+      tags: [Goals]
+      operationId: replaceCurrentGoal
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGoalRequest'
+      responses:
+        '200':
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /settings:
+    get:
+      tags: [Settings]
+      operationId: getSettings
+      responses:
+        '200':
+          description: Synchronizable settings; notification execution remains on device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+    put:
+      tags: [Settings]
+      operationId: replaceSettings
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsRequest'
+      responses:
+        '200':
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /sync/bootstrap:
+    post:
+      tags: [Sync]
+      operationId: bootstrapSync
+      description: Returns a snapshot-bound page. Continue with snapshotToken, then pull from returned cursor.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapRequest'
+      responses:
+        '200':
+          description: Snapshot page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootstrapResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /sync/push:
+    post:
+      tags: [Sync]
+      operationId: pushMutations
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncPushRequest'
+      responses:
+        '200':
+          description: Per-item results; envelope success does not imply every mutation applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncPushResponse'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+  /sync/pull:
+    get:
+      tags: [Sync]
+      operationId: pullChanges
+      parameters:
+        - name: cursor
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Canonical changes and tombstones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncPullResponse'
+        '410':
+          $ref: '#/components/responses/CursorExpired'
+  /privacy/exports:
+    post:
+      tags: [Privacy]
+      operationId: createDataExport
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ReauthenticationToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExportRequest'
+      responses:
+        '202':
+          description: Export job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyJob'
+        '401':
+          $ref: '#/components/responses/ReauthRequired'
+  /privacy/exports/{jobId}:
+    get:
+      tags: [Privacy]
+      operationId: getDataExport
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Export job; download URL is short-lived when ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyJob'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /privacy/account-deletion:
+    get:
+      tags: [Privacy]
+      operationId: getAccountDeletion
+      responses:
+        '200':
+          description: Account deletion job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyJob'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Privacy]
+      operationId: scheduleAccountDeletion
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ReauthenticationToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleAccountDeletionRequest'
+      responses:
+        '202':
+          description: Deletion scheduled; not equivalent to local reset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyJob'
+        '401':
+          $ref: '#/components/responses/ReauthRequired'
+    delete:
+      tags: [Privacy]
+      operationId: cancelAccountDeletion
+      parameters:
+        - $ref: '#/components/parameters/ReauthenticationToken'
+      responses:
+        '204':
+          description: Scheduled deletion cancelled if still cancellable
+        '409':
+          $ref: '#/components/responses/Conflict'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT-or-opaque
+  parameters:
+    AssetId:
+      name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: Quoted current version, for example "4".
+      schema:
+        type: string
+        pattern: '^"[1-9][0-9]*"$'
+    ReauthenticationToken:
+      name: X-Reauthentication-Token
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 16
+  responses:
+    ValidationError:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication required or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ReauthRequired:
+      description: Fresh reauthentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Operation not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource absent or hidden from caller
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Idempotency, concurrency, or domain conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unprocessable:
+      description: Semantically invalid domain operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    CursorExpired:
+      description: Cursor retention window elapsed; bootstrap is required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    PayloadTooLarge:
+      description: Sync batch exceeds count or byte limit
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: Rate limited
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Temporarily unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [status, serverTime]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        serverTime:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [code, message, requestId, retryable]
+      properties:
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9_]+$'
+        message:
+          type: string
+        requestId:
+          type: string
+        retryable:
+          type: boolean
+        details:
+          type: object
+          additionalProperties: true
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, accountState, syncEnabled, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accountState:
+          type: string
+          enum: [active, deletion_scheduled, deleting]
+        syncEnabled:
+          type: boolean
+        consentVersion:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    CreateSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [strategy, assertion]
+      properties:
+        strategy:
+          type: string
+          description: Proposed provider-neutral strategy identifier; finalized by ADR-007.
+          minLength: 1
+          maxLength: 64
+        assertion:
+          type: string
+          description: One-time provider assertion; never log.
+          minLength: 1
+          maxLength: 4096
+    RefreshSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 16
+          maxLength: 4096
+    AuthSession:
+      type: object
+      additionalProperties: false
+      required: [accessToken, refreshToken, tokenType, expiresInSeconds, user]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          enum: [Bearer]
+        expiresInSeconds:
+          type: integer
+          minimum: 1
+        user:
+          $ref: '#/components/schemas/User'
+    RegisterDeviceRequest:
+      type: object
+      additionalProperties: false
+      required: [deviceId, clientInstanceId, platform, appVersion]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        clientInstanceId:
+          type: string
+          format: uuid
+        platform:
+          type: string
+          enum: [harmonyos]
+        appVersion:
+          type: string
+          maxLength: 32
+        displayName:
+          type: string
+          maxLength: 64
+    Device:
+      allOf:
+        - $ref: '#/components/schemas/RegisterDeviceRequest'
+        - type: object
+          required: [registeredAt, lastSeenAt, revokedAt]
+          properties:
+            registeredAt:
+              type: string
+              format: date-time
+            lastSeenAt:
+              type: string
+              format: date-time
+            revokedAt:
+              type: string
+              format: date-time
+              nullable: true
+    DecimalString:
+      type: string
+      pattern: '^[0-9]+(\.[0-9]+)?$'
+    LocalDate:
+      type: string
+      format: date
+      pattern: '^\d{4}-\d{2}-\d{2}$'
+    CreateAssetRequest:
+      type: object
+      additionalProperties: false
+      required: [clientMutationId, brand, tarMg, nicotineMg, initialStockCount, packPriceFen, currency, isDefault]
+      properties:
+        clientMutationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 16
+        tarMg:
+          allOf:
+            - $ref: '#/components/schemas/DecimalString'
+          example: '10'
+        nicotineMg:
+          allOf:
+            - $ref: '#/components/schemas/DecimalString'
+          example: '1.0'
+        initialStockCount:
+          type: integer
+          minimum: 1
+          maximum: 200
+        packPriceFen:
+          type: integer
+          format: int64
+          minimum: 100
+          maximum: 20000
+        currency:
+          type: string
+          enum: [CNY]
+        isDefault:
+          type: boolean
+    UpdateAssetProfileRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        clientMutationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 16
+        tarMg:
+          $ref: '#/components/schemas/DecimalString'
+        nicotineMg:
+          $ref: '#/components/schemas/DecimalString'
+        packPriceFen:
+          type: integer
+          format: int64
+          minimum: 100
+          maximum: 20000
+    SetDefaultAssetRequest:
+      type: object
+      additionalProperties: false
+      required: [clientMutationId]
+      properties:
+        clientMutationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+    Asset:
+      type: object
+      additionalProperties: false
+      required: [id, brand, tarMg, nicotineMg, stockCount, packPriceFen, currency, isDefault, profileVersion, stockRevision, createdAt, updatedAt, deletedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 16
+        tarMg:
+          $ref: '#/components/schemas/DecimalString'
+        nicotineMg:
+          $ref: '#/components/schemas/DecimalString'
+        stockCount:
+          type: integer
+          minimum: 0
+        packPriceFen:
+          type: integer
+          format: int64
+          minimum: 100
+          maximum: 20000
+        currency:
+          type: string
+          enum: [CNY]
+        isDefault:
+          type: boolean
+        profileVersion:
+          type: integer
+          format: int64
+          minimum: 1
+        stockRevision:
+          type: integer
+          format: int64
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+    AssetPage:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor, serverTime]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        nextCursor:
+          type: string
+          nullable: true
+        serverTime:
+          type: string
+          format: date-time
+    RiskSnapshot:
+      type: object
+      additionalProperties: false
+      required: [modelVersion, todayTaken, stockCount, todayPackYearIncrement, stockPotentialPackYears, lungScore, netHealth, dailyHarmScore, todayHealthDebtMinutes, stockHealthDebtMinutes]
+      properties:
+        modelVersion:
+          type: string
+          pattern: '^quit-risk/[A-Za-z0-9._-]+$'
+        todayTaken:
+          type: integer
+          minimum: 0
+        stockCount:
+          type: integer
+          minimum: 0
+        todayPackYearIncrement:
+          type: number
+          format: double
+          minimum: 0
+        stockPotentialPackYears:
+          type: number
+          format: double
+          minimum: 0
+        lungScore:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        netHealth:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          description: Must equal clamp(100 - lungScore, 0, 100), never 100 - dailyHarmScore.
+        dailyHarmScore:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        todayHealthDebtMinutes:
+          type: integer
+          minimum: 0
+        stockHealthDebtMinutes:
+          type: integer
+          minimum: 0
+    LedgerEventBaseRequest:
+      type: object
+      required: [clientMutationId, deviceId, assetId, action, cigarettes, occurredAt, localDate, timezoneOffsetMinutes, modelVersion]
+      properties:
+        clientMutationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        deviceId:
+          type: string
+          format: uuid
+        assetId:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [take, return, retire]
+        cigarettes:
+          type: integer
+          minimum: 1
+        occurredAt:
+          type: string
+          format: date-time
+        localDate:
+          $ref: '#/components/schemas/LocalDate'
+        timezoneOffsetMinutes:
+          type: integer
+          minimum: -840
+          maximum: 840
+        scene:
+          type: string
+          maxLength: 64
+        note:
+          type: string
+          maxLength: 500
+        modelVersion:
+          type: string
+          pattern: '^quit-risk/[A-Za-z0-9._-]+$'
+    TakeEventRequest:
+      allOf:
+        - $ref: '#/components/schemas/LedgerEventBaseRequest'
+        - type: object
+          required: [action]
+          properties:
+            action:
+              type: string
+              enum: [take]
+    ReturnEventRequest:
+      allOf:
+        - $ref: '#/components/schemas/LedgerEventBaseRequest'
+        - type: object
+          required: [action, reversesEventId]
+          properties:
+            action:
+              type: string
+              enum: [return]
+            reversesEventId:
+              type: string
+              format: uuid
+    RetireEventRequest:
+      allOf:
+        - $ref: '#/components/schemas/LedgerEventBaseRequest'
+        - type: object
+          required: [action]
+          properties:
+            action:
+              type: string
+              enum: [retire]
+            batchId:
+              type: string
+              format: uuid
+    LedgerEvent:
+      type: object
+      additionalProperties: false
+      required: [id, clientMutationId, deviceId, assetId, action, cigarettes, occurredAt, serverReceivedAt, localDate, timezoneOffsetMinutes, tarMg, costFen, healthMinutes, riskSnapshot]
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientMutationId:
+          type: string
+        deviceId:
+          type: string
+          format: uuid
+        assetId:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [take, return, retire]
+        cigarettes:
+          type: integer
+          minimum: 1
+        occurredAt:
+          type: string
+          format: date-time
+        serverReceivedAt:
+          type: string
+          format: date-time
+        localDate:
+          $ref: '#/components/schemas/LocalDate'
+        timezoneOffsetMinutes:
+          type: integer
+          minimum: -840
+          maximum: 840
+        scene:
+          type: string
+          maxLength: 64
+        note:
+          type: string
+          maxLength: 500
+        reversesEventId:
+          type: string
+          format: uuid
+          nullable: true
+        batchId:
+          type: string
+          format: uuid
+          nullable: true
+        brandSnapshot:
+          type: string
+          maxLength: 16
+        tarMg:
+          $ref: '#/components/schemas/DecimalString'
+        costFen:
+          type: integer
+          format: int64
+        healthMinutes:
+          type: integer
+        riskSnapshot:
+          $ref: '#/components/schemas/RiskSnapshot'
+    LedgerEventPage:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor, serverTime]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedgerEvent'
+        nextCursor:
+          type: string
+          nullable: true
+        serverTime:
+          type: string
+          format: date-time
+    Goal:
+      type: object
+      additionalProperties: false
+      required: [id, dailyTarget, interventionLine, version, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        dailyTarget:
+          type: integer
+          minimum: 0
+          maximum: 200
+        interventionLine:
+          type: integer
+          minimum: 0
+          maximum: 200
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateGoalRequest:
+      type: object
+      additionalProperties: false
+      required: [clientMutationId, dailyTarget, interventionLine]
+      properties:
+        clientMutationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        dailyTarget:
+          type: integer
+          minimum: 0
+          maximum: 200
+        interventionLine:
+          type: integer
+          minimum: 0
+          maximum: 200
+    Settings:
+      type: object
+      additionalProperties: false
+      required: [strictRiskAlertEnabled, smokeFeedbackEnabled, dailyReviewEnabled, dailyReviewTime, localFirstEnabled, syncEnabled, version, updatedAt]
+      properties:
+        strictRiskAlertEnabled:
+          type: boolean
+          description: Notification execution remains local to the phone.
+        smokeFeedbackEnabled:
+          type: boolean
+        dailyReviewEnabled:
+          type: boolean
+        dailyReviewTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+        localFirstEnabled:
+          type: boolean
+          enum: [true]
+        syncEnabled:
+          type: boolean
+        consentVersion:
+          type: string
+          nullable: true
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateSettingsRequest:
+      type: object
+      additionalProperties: false
+      required: [clientMutationId, strictRiskAlertEnabled, smokeFeedbackEnabled, dailyReviewEnabled, dailyReviewTime]
+      properties:
+        clientMutationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        strictRiskAlertEnabled:
+          type: boolean
+        smokeFeedbackEnabled:
+          type: boolean
+        dailyReviewEnabled:
+          type: boolean
+        dailyReviewTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+    BootstrapRequest:
+      type: object
+      additionalProperties: false
+      required: [deviceId, consentVersion]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        consentVersion:
+          type: string
+          minLength: 1
+        snapshotToken:
+          type: string
+          description: Omit for first page; send unchanged token for subsequent pages.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 100
+    BootstrapResponse:
+      type: object
+      additionalProperties: false
+      required: [snapshotSeq, snapshotToken, assets, ledgerEvents, goal, settings, nextPageToken, pullCursor, serverTime]
+      properties:
+        snapshotSeq:
+          type: integer
+          format: int64
+          minimum: 0
+        snapshotToken:
+          type: string
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        ledgerEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedgerEvent'
+        goal:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/Goal'
+          nullable: true
+        settings:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/Settings'
+          nullable: true
+        nextPageToken:
+          type: string
+          nullable: true
+        pullCursor:
+          type: string
+        serverTime:
+          type: string
+          format: date-time
+    SyncMutation:
+      type: object
+      additionalProperties: false
+      required: [clientMutationId, kind, payload]
+      properties:
+        clientMutationId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        kind:
+          type: string
+          enum: [asset.create, asset.update, asset.set_default, asset.delete, ledger.append, goal.update, settings.update]
+        dependsOnMutationIds:
+          type: array
+          maxItems: 50
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+        baseVersion:
+          type: integer
+          format: int64
+          minimum: 1
+        payload:
+          type: object
+          description: Must match the DTO selected by kind; tightened in implementation contract tests.
+          additionalProperties: true
+    SyncPushRequest:
+      type: object
+      additionalProperties: false
+      required: [deviceId, mutations]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        mutations:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/SyncMutation'
+    SyncMutationResult:
+      type: object
+      additionalProperties: false
+      required: [clientMutationId, status]
+      properties:
+        clientMutationId:
+          type: string
+        status:
+          type: string
+          enum: [applied, duplicate, conflict, pending_dependency]
+        canonicalId:
+          type: string
+          format: uuid
+          nullable: true
+        code:
+          type: string
+          nullable: true
+        currentVersion:
+          type: integer
+          format: int64
+          nullable: true
+    SyncPushResponse:
+      type: object
+      additionalProperties: false
+      required: [results, serverTime]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncMutationResult'
+        serverTime:
+          type: string
+          format: date-time
+    SyncChange:
+      type: object
+      additionalProperties: false
+      required: [changeSeq, resourceType, resourceId, operation, changedAt]
+      properties:
+        changeSeq:
+          type: integer
+          format: int64
+          minimum: 1
+        resourceType:
+          type: string
+          enum: [asset, ledger_event, goal, settings, device]
+        resourceId:
+          type: string
+          format: uuid
+        operation:
+          type: string
+          enum: [upsert, delete]
+        resource:
+          type: object
+          nullable: true
+          additionalProperties: true
+        changedAt:
+          type: string
+          format: date-time
+    Tombstone:
+      type: object
+      additionalProperties: false
+      required: [changeSeq, resourceType, resourceId, deletedAt]
+      properties:
+        changeSeq:
+          type: integer
+          format: int64
+          minimum: 1
+        resourceType:
+          type: string
+          enum: [asset, goal, settings, device]
+        resourceId:
+          type: string
+          format: uuid
+        deletedAt:
+          type: string
+          format: date-time
+    SyncPullResponse:
+      type: object
+      additionalProperties: false
+      required: [changes, tombstones, nextCursor, hasMore, serverTime]
+      properties:
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncChange'
+        tombstones:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tombstone'
+        nextCursor:
+          type: string
+        hasMore:
+          type: boolean
+        serverTime:
+          type: string
+          format: date-time
+    CreateExportRequest:
+      type: object
+      additionalProperties: false
+      required: [format, confirmed]
+      properties:
+        format:
+          type: string
+          enum: [json, csv_bundle]
+        confirmed:
+          type: boolean
+          enum: [true]
+    ScheduleAccountDeletionRequest:
+      type: object
+      additionalProperties: false
+      required: [confirmationText, confirmed]
+      properties:
+        confirmationText:
+          type: string
+          minLength: 1
+          maxLength: 64
+        confirmed:
+          type: boolean
+          enum: [true]
+    PrivacyJob:
+      type: object
+      additionalProperties: false
+      required: [id, type, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [data_export, account_deletion]
+        status:
+          type: string
+          enum: [queued, processing, ready, scheduled, completed, failed, cancelled]
+        downloadUrl:
+          type: string
+          format: uri
+          nullable: true
+        downloadExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        scheduledFor:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

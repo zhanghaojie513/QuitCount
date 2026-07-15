@@ -1,0 +1,14 @@
+{
+  "clientMutationId": "harmony-01JZRETURN0000000000000001",
+  "deviceId": "0190d1d4-4c45-7d28-a413-9f82e88f3270",
+  "assetId": "0190d1d4-4c45-7d28-a413-9f82e88f3271",
+  "action": "return",
+  "cigarettes": 1,
+  "reversesEventId": "0190d1d4-4c45-7d28-a413-9f82e88f3272",
+  "occurredAt": "2026-07-15T12:12:00+08:00",
+  "localDate": "2026-07-15",
+  "timezoneOffsetMinutes": 480,
+  "scene": "",
+  "note": "撤销刚才一次取出",
+  "modelVersion": "quit-risk/1.0.0"
+}

@@ -1,6 +1,6 @@
 # 戒烟有数后端技术设计
 
-> 状态：设计草案，2026-07-14。NestJS 11 最小工程已初始化；数据库、云账号、短信供应商、域名、部署环境和领域业务仍不存在。
+> 状态：设计草案，2026-07-15。NestJS 11 工程、Stage 0 契约和 Stage 1 质量/容器/CI 配置已建立；本机缺少 Docker CLI，容器运行和远端 CI 尚未验证。数据库、云账号、短信供应商、域名、部署环境和领域业务仍不存在。
 
 ## 1. 文档定位与事实标记
 
@@ -61,8 +61,8 @@
 | Runtime | **【已确认事实】开发基线为 Node.js `24.16.0` + npm `11.13.0`**；生产镜像仍待运维确认 | `.node-version`、`packageManager` 和 `engines` 已固定开发主线；截至 2026-07-14，Node 24 为 LTS。生产只使用受支持 LTS，并固定镜像 digest。参考 [Node.js Releases](https://nodejs.org/en/about/previous-releases)。 |
 | 框架 | **【已确认事实】NestJS 11 工程已初始化** | 当前核心运行包为 `11.1.28`。后续实现必须以 NestJS 11 官方文档和已安装类型定义为依据，不得新增已废弃 API；升级框架前先做 migration guide、编译、测试和契约验证。参考 [NestJS migration guide](https://docs.nestjs.com/migration-guide)。 |
 | HTTP | REST JSON + `/api/v1` + **OpenAPI 3.0.3** | **【建议选型】** 3.0.3 与 NestJS `@nestjs/swagger` 的 code-first 工具链更稳妥；同步用专用批量端点。若未来必须使用 OpenAPI 3.1，应改为 contract-first，并在 ADR 中确认生成器、lint、客户端代码生成和兼容性验证，不得只改版本号。 |
-| 数据库 | **【建议选型】PostgreSQL 17 或 18 的当前 minor** | 事务、约束、部分唯一索引、`timestamptz`、`numeric`、JSONB 和增量游标适合本领域。主版本由运维按托管支持、升级窗口和插件兼容性 ADR 定版；官方主版本支持周期为 5 年，参考 [PostgreSQL versioning policy](https://www.postgresql.org/support/versioning/)。 |
-| ORM/迁移 | **【建议选型】Prisma ORM + 受审 SQL migration** | 类型安全、schema 与迁移可审查；部分唯一索引、触发器/约束用 SQL migration 补充。事务需短小。参考 [Prisma transactions](https://www.prisma.io/docs/orm/prisma-client/queries/transactions) 与 [PostgreSQL connector](https://www.prisma.io/docs/orm/v6/overview/databases/postgresql)。 |
+| 数据库 | **【ADR 已接受】PostgreSQL 18 当前安全 minor** | 事务、约束、部分唯一索引、`timestamptz`、`numeric`、JSONB 和增量游标适合本领域。若 Stage 2 最终托管平台不支持 18，需经 ADR 修订回退 PostgreSQL 17；不得静默改变。参考 [ADR-002](./adr/ADR-002-runtime-framework-database.md)。 |
+| ORM/迁移 | **【ADR 已接受】Prisma ORM + 受审 SQL migration** | 类型安全、schema 与迁移可审查；部分唯一索引、检查约束和并发细节用 SQL migration 补充。事务需短小，生产禁止自动同步 schema。参考 [ADR-003](./adr/ADR-003-orm-and-migrations.md)。 |
 | ORM 备选 | TypeORM + 显式 migration | 若团队更熟悉 decorator/repository、需更直接操控 SQL，可选 TypeORM。禁止运行时 `synchronize: true`。选型必须记录 ADR，不混用两套 ORM。 |
 | 配置 | `@nestjs/config` + 启动时 schema 校验 | 缺少关键配置应快速失败；密钥只来自 secret manager/运行环境，不提交仓库。 |
 | 日志 | Pino 结构化 JSON + request/correlation ID | 支持字段脱敏、低开销与集中检索；不记录令牌、验证码、完整备注或导出内容。 |
@@ -329,7 +329,7 @@ DTO 建议按用途而非数据库表命名，例如 `CreateAssetRequest`、`Upd
 
 ## 12. OpenAPI 与 Harmony 集成策略
 
-1. Stage 0 先以 OpenAPI 3.0.3 创建 `openapi/backend-v1.yaml`，以 DTO、错误码、分页、同步 envelope 和示例为契约源。未来升级 3.1 必须单独 ADR，并验证 Nest 生成、lint 和 Harmony client 工具链。
+1. Stage 0 已以 OpenAPI 3.0.3 创建 `openapi/backend-v1.yaml`，以 DTO、错误码、分页、同步 envelope 和示例为契约源。未来升级 3.1 必须单独 ADR，并验证 Nest 生成、lint 和 Harmony client 工具链。
 2. CI 校验 OpenAPI 语法、breaking change 与实现一致性；发布版本保留不可变契约快照。
 3. Harmony 侧从已发布契约生成或人工封装 ArkTS client；生成代码与 domain model 之间设 adapter，避免 API DTO 直接侵入 UI/ViewModel。
 4. 在功能开关和用户明确同意前，不注册账户、不上传本地数据。启用同步后先注册 `clientInstanceId/deviceId`，执行 bootstrap，再上传 outbox。
@@ -349,24 +349,15 @@ DTO 建议按用途而非数据库表命名，例如 `CreateAssetRequest`、`Upd
 ### 13.2 待确认决策
 
 - 账户方式：匿名账户升级、邮箱、短信还是第三方；是否允许无密码登录。
-- PostgreSQL 17 或 18、Prisma 或 TypeORM、CI/部署平台、地区与高可用级别。
+- CI/部署平台、地区与高可用级别；PostgreSQL 18 + Prisma 已由 ADR-002/003 接受，但真实托管兼容性仍须 Stage 2 复核。
 - 货币是否首期只支持 CNY；历史元金额转分的舍入策略。
 - goal 的合法范围、资产删除语义、跨日 return 是否永远禁止或允许纠错流程。
 - 云端导出格式、账户删除冷静期、法定保留期、备份 RPO/RTO。
 - 同步冲突的产品呈现、游标保留期和单批大小。
 
-### 13.3 建议 ADR 清单
+### 13.3 Stage 0 ADR 清单
 
-- ADR-001：模块化单体与模块边界。
-- ADR-002：Node/Nest/PostgreSQL 主版本与升级策略。
-- ADR-003：Prisma vs TypeORM 与迁移所有权。
-- ADR-004：本地优先同步、游标和 change log。
-- ADR-005：不可变账本、return 关联和库存物化。
-- ADR-006：金额、时间与自然日口径。
-- ADR-007：认证与账户升级路径。
-- ADR-008：模型版本、快照与历史兼容。
-- ADR-009：隐私导出、删除、保留和备份恢复。
-- ADR-010：资产 `profileVersion`/`stockRevision` 与默认资产锁策略。
-- ADR-011：bootstrap 水位、`lastChangeSeq`、永久去重与依赖组事务。
+- ADR-001 至 ADR-006、ADR-008、ADR-010、ADR-011 已接受；ADR-007（认证供应商/方式）与 ADR-009（法定保留和备份 SLA）保持 proposed。
+- 状态、责任角色和截止门禁统一见 [ADR 索引](./adr/README.md)，禁止在本文复制维护另一套状态。
 
-下一步仅建议从 [后端实施计划的 Stage 0](./backend_implementation_plan.md#stage-0文档adr-openapi-草案与可行性) 开始；本轮不执行该阶段。
+Stage 0 的实际产物和验证状态见 [后端实施计划的 Stage 0](./backend_implementation_plan.md#stage-0文档adropenapi-草案与可行性) 与阶段报告；任何未通过门禁的草案不得被描述为已上线能力。
