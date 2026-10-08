@@ -155,6 +155,16 @@
 - 应用回滚不得依赖降级数据库 schema。不可逆数据迁移优先 roll-forward，并预先演练。
 - 每阶段报告必须如实列出未验证项；“编译通过”不得写成“设备/生产验证通过”。
 
+### 8.4 华为云部署规则
+
+- **【已确认事实】** 华为云是优先部署平台；只确认账号可用，不得据此声称地域、配额、备案、域名、VPC、RDS、CAE/CCE 或生产环境已存在。
+- **【建议选型】** MVP 优先评估 `CAE + SWR + RDS for PostgreSQL + LTS/AOM`；需要 Kubernetes 能力时再评估 CCE。最终拓扑与 PostgreSQL 17/18 选择必须通过 [ADR-012](./adr/ADR-012-huawei-cloud-deployment.md)。
+- 云资源必须通过 IaC 可重复创建，至少隔离 `dev/staging/prod`；IAM 使用最小权限，数据库只走私网，应用账户无 DDL 权限，migration 使用独立受控身份。
+- GitHub Actions 到华为云优先使用短期凭据/联邦身份；若平台限制只能使用 AK/SK，必须存入受保护 Secret、限制权限并制定轮换，不得写入仓库、镜像、日志或报告。
+- SWR 镜像以 commit SHA 和 digest 标识，禁止复用可变生产标签作为唯一发布证据；发布记录必须能追溯源码、lockfile、SBOM、扫描结果和 migration。
+- 华为云 RDS 的数据库主版本及规格以目标地域控制台和官方文档为准。当前公开购买文档最高为 PostgreSQL 17；不得在未验证兼容性时把 PostgreSQL 18 migration 直接部署到 RDS 17。
+- LTS/AOM/CES 日志、指标和告警仍受本文件的数据最小化与脱敏规则约束；接入云日志不构成扩大采集范围的授权。
+
 ## 9. 禁止项
 
 - 禁止把严厉危害通知改成服务端阻塞、远程审批或取烟失败条件。

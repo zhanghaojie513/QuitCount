@@ -1,0 +1,178 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
+
+
+ROOT = Path(__file__).resolve().parent
+FINAL = ROOT / "final"
+DATA = ROOT / "data"
+
+MASTER_SIZE = 1024
+SCALE = 4
+CANVAS = MASTER_SIZE * SCALE
+
+GREEN = "#124A3F"
+GREEN_LIGHT = "#2D6A5B"
+MINT = "#EFF8F3"
+MINT_SOFT = "#CFE8DD"
+CORAL = "#D45A5F"
+PAPER = "#F8F7F2"
+INK = "#0A2D27"
+
+
+def s(value: float) -> int:
+    return round(value * SCALE)
+
+
+def cubic(p0: tuple[float, float], p1: tuple[float, float], p2: tuple[float, float],
+          p3: tuple[float, float], steps: int = 28) -> list[tuple[int, int]]:
+    points: list[tuple[int, int]] = []
+    for index in range(steps + 1):
+        t = index / steps
+        u = 1 - t
+        x = u ** 3 * p0[0] + 3 * u ** 2 * t * p1[0] + 3 * u * t ** 2 * p2[0] + t ** 3 * p3[0]
+        y = u ** 3 * p0[1] + 3 * u ** 2 * t * p1[1] + 3 * u * t ** 2 * p2[1] + t ** 3 * p3[1]
+        points.append((s(x), s(y)))
+    return points
+
+
+def lung_polygon(left: bool) -> list[tuple[int, int]]:
+    if left:
+        segments = [
+            ((477, 274), (395, 248), (288, 316), (250, 465)),
+            ((250, 465), (202, 656), (304, 792), (453, 748)),
+            ((453, 748), (490, 683), (500, 583), (492, 487)),
+            ((492, 487), (486, 397), (492, 316), (477, 274)),
+        ]
+    else:
+        segments = [
+            ((547, 274), (629, 248), (736, 316), (774, 465)),
+            ((774, 465), (822, 656), (720, 792), (571, 748)),
+            ((571, 748), (534, 683), (524, 583), (532, 487)),
+            ((532, 487), (538, 397), (532, 316), (547, 274)),
+        ]
+
+    points: list[tuple[int, int]] = []
+    for index, segment in enumerate(segments):
+        sampled = cubic(*segment)
+        points.extend(sampled if index == 0 else sampled[1:])
+    return points
+
+
+def build_layers() -> tuple[Image.Image, Image.Image, Image.Image]:
+    background = Image.new("RGBA", (CANVAS, CANVAS), GREEN)
+    bg_draw = ImageDraw.Draw(background)
+    bg_draw.rounded_rectangle((s(36), s(36), s(988), s(988)), radius=s(220), outline=GREEN_LIGHT, width=s(5))
+    for inset, alpha in ((126, 34), (174, 28), (222, 22)):
+        bg_draw.ellipse((s(inset), s(inset), s(1024 - inset), s(1024 - inset)),
+                        outline=(207, 232, 221, alpha), width=s(4))
+
+    foreground = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(foreground)
+    draw.polygon(lung_polygon(True), fill=MINT)
+    draw.polygon(lung_polygon(False), fill=MINT)
+
+    line_width = s(20)
+    draw.line((s(512), s(215), s(512), s(394)), fill=MINT_SOFT, width=line_width)
+    draw.line((s(512), s(375), s(425), s(463)), fill=MINT_SOFT, width=line_width)
+    draw.line((s(512), s(375), s(599), s(463)), fill=MINT_SOFT, width=line_width)
+
+    branch = (18, 74, 63, 155)
+    draw.line((s(450), s(455), s(366), s(548), s(330), s(653)), fill=branch, width=s(13), joint="curve")
+    draw.line((s(574), s(455), s(658), s(548), s(694), s(653)), fill=branch, width=s(13), joint="curve")
+
+    chart_points = [(s(429), s(651)), (s(512), s(602)), (s(594), s(630)), (s(676), s(565))]
+    draw.line(chart_points, fill=CORAL, width=s(18), joint="curve")
+    for x, y in chart_points:
+        draw.ellipse((x - s(15), y - s(15), x + s(15), y + s(15)), fill=CORAL)
+
+    composite = Image.alpha_composite(background, foreground)
+    return background, foreground, composite
+
+
+def save_icon_sizes(master: Image.Image) -> list[dict[str, object]]:
+    exports: list[dict[str, object]] = []
+    for size in (1024, 512, 288, 256, 192, 128, 96, 64, 48):
+        target = master.resize((size, size), Image.Resampling.LANCZOS)
+        path = FINAL / f"app-icon-{size}.png"
+        target.save(path, optimize=True)
+        exports.append({"path": str(path), "width": size, "height": size})
+    return exports
+
+
+def preview_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
+    path = Path(r"C:\Windows\Fonts\msyhbd.ttc" if bold else r"C:\Windows\Fonts\msyh.ttc")
+    return ImageFont.truetype(str(path), size=size)
+
+
+def build_preview(master: Image.Image) -> Path:
+    preview = Image.new("RGB", (1600, 960), PAPER)
+    draw = ImageDraw.Draw(preview)
+    draw.text((90, 62), "戒烟有数 · App 图标提案", fill=INK, font=preview_font(52, True))
+    draw.text((92, 132), "呼吸计数：肺部轮廓 × 行为数据点 × 上扬轨迹", fill="#52645F", font=preview_font(28))
+
+    large = master.resize((560, 560), Image.Resampling.LANCZOS)
+    preview.paste(large.convert("RGB"), (90, 230))
+
+    draw.rounded_rectangle((760, 230, 1510, 790), radius=44, fill="#FFFFFF")
+    draw.text((830, 292), "小尺寸辨识", fill=INK, font=preview_font(34, True))
+    x = 830
+    for size in (192, 128, 96, 64, 48):
+        icon = master.resize((size, size), Image.Resampling.LANCZOS).convert("RGB")
+        preview.paste(icon, (x, 390))
+        draw.text((x, 410 + size), f"{size}px", fill="#52645F", font=preview_font(20))
+        x += size + 44
+
+    draw.text((830, 650), "深绿：稳重与本地优先", fill=GREEN, font=preview_font(25, True))
+    draw.text((830, 696), "薄荷：呼吸与恢复感", fill=GREEN, font=preview_font(25, True))
+    draw.text((830, 742), "珊瑚：一次选择、一个数据点", fill=CORAL, font=preview_font(25, True))
+
+    path = FINAL / "app-icon-review.png"
+    preview.save(path, quality=95, optimize=True)
+    return path
+
+
+def main() -> None:
+    FINAL.mkdir(parents=True, exist_ok=True)
+    DATA.mkdir(parents=True, exist_ok=True)
+    background, foreground, master = build_layers()
+
+    background_path = FINAL / "background-1024.png"
+    foreground_path = FINAL / "foreground-1024.png"
+    background.resize((MASTER_SIZE, MASTER_SIZE), Image.Resampling.LANCZOS).save(background_path, optimize=True)
+    foreground.resize((MASTER_SIZE, MASTER_SIZE), Image.Resampling.LANCZOS).save(foreground_path, optimize=True)
+    master = master.resize((MASTER_SIZE, MASTER_SIZE), Image.Resampling.LANCZOS)
+    exports = save_icon_sizes(master)
+    preview_path = build_preview(master)
+
+    manifest = {
+        "title": "戒烟有数 App 图标",
+        "status": "review",
+        "selectedRoute": "呼吸计数",
+        "family": "utility-symbol",
+        "brandName": "戒烟有数",
+        "usageContexts": ["HarmonyOS app icon", "launcher icon", "store listing", "poster brand mark"],
+        "preserve": ["深绿、薄荷、珊瑚品牌色", "48px 小尺寸轮廓", "不使用香烟、烟雾或医疗十字"],
+        "meaning": ["双肺代表产品关注的健康负担", "四个珊瑚数据点代表持续记录", "上扬轨迹代表看见后逐步改变"],
+        "adaptiveLayers": {"background": str(background_path), "foreground": str(foreground_path)},
+        "exports": exports,
+        "review": str(preview_path),
+        "legal": ["上线前进行商标与近似图形检索", "该提案不是医疗机构或治疗服务标识"]
+    }
+    (DATA / "logo-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    (DATA / "handoff.md").write_text(
+        "# 戒烟有数 App 图标交付\n\n"
+        "- 选中方向：呼吸计数\n"
+        "- 保留：深绿底、薄荷肺叶、珊瑚数据轨迹、小尺寸高辨识\n"
+        "- 避免：香烟、烟雾、红叉、医疗十字、治疗承诺\n"
+        "- 下一步：确认后将 background-1024.png 与 foreground-1024.png 接入 Harmony layered-image 资源。\n"
+        "- 风险：正式上线前需完成商标和近似图形检索。\n",
+        encoding="utf-8"
+    )
+
+
+if __name__ == "__main__":
+    main()

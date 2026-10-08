@@ -1,0 +1,82 @@
+/* 戒烟有数 · 设计 token（CSS 自定义属性）
+ * 语义规则见 design-spec.md 第 2 节。
+ * 铁律：颜色按语义分配，不按美观分配。实现时优先引用「语义别名」那一层。
+ */
+:root{
+  /* ---- 品牌 · 正向 ---- */
+  --qc-sage-900:#38665F;
+  --qc-sage-700:#4E8B7E;
+  --qc-sage-500:#6BA8A0;
+  --qc-sage-200:#DFEBE5;
+  --qc-sage-100:#F2F7F5;
+
+  /* ---- 中性面 ---- */
+  --qc-cream:#F8F6F2;
+  --qc-surface:#FFFFFF;
+  --qc-line:#E4E0D8;
+  --qc-line-soft:#EDE9E1;
+
+  /* ---- 文字 ---- */
+  --qc-ink:#1A211E;
+  --qc-muted:#67726C;       /* 原 #8A948D：白底 3.1:1 不达 AA，加深（白 4.98 / 奶油 4.61） */
+  --qc-muted-light:#6E7973; /* 原 #9AA39D：白底 2.6:1，加深至 4.51 */
+  --qc-disabled:#C6CFC9;
+
+  /* ---- 代价 · 警告 ---- */
+  --qc-amber:#C26B32;
+  --qc-amber-bg:#FBEDE1;
+  --qc-amber-ink:#8A4A1C;   /* 琥珀底上的深琥珀文字（预测条 / 口径提示） */
+  --qc-warm:#B4553F;
+  --qc-warm-soft:#A5765C;
+
+  /* ---- 语义别名（实现优先用这一层） ---- */
+  --qc-bg-page:var(--qc-cream);
+  --qc-bg-card:var(--qc-surface);
+  --qc-text-primary:var(--qc-ink);
+  --qc-text-secondary:var(--qc-muted);
+  --qc-text-tertiary:var(--qc-muted-light);
+  --qc-action-primary:var(--qc-sage-900);        /* 推荐选项，同屏唯一 */
+  --qc-action-primary-fg:#FFFFFF;
+  --qc-action-neutral-bg:var(--qc-sage-200);     /* 「取出」家族 */
+  --qc-action-neutral-fg:var(--qc-sage-900);
+  --qc-action-caution-fg:var(--qc-warm);         /* 不推荐但可执行 */
+  --qc-cost:var(--qc-amber);                     /* 代价，固定语义 */
+  --qc-cost-bg:var(--qc-amber-bg);
+
+  /* ---- 圆角 ---- */
+  --qc-radius-card:22px;
+  --qc-radius-card-lg:24px;
+  --qc-radius-button:16px;
+  --qc-radius-field:14px;
+  --qc-radius-pill:999px;
+  --qc-radius-sheet:28px;
+
+  /* ---- 间距 ---- */
+  --qc-gutter:20px;
+  --qc-gap:14px;
+  --qc-pad-card:16px;
+
+  /* ---- 阴影（只有一层） ---- */
+  --qc-shadow:0 6px 18px -4px rgba(158,184,174,.20);
+
+  /* ---- 字体 ---- */
+  --qc-font-cn:"Noto Sans SC","PingFang SC",sans-serif;
+  --qc-font-num:"Inter","SF Pro Display",sans-serif;
+  --qc-font-mono:ui-monospace,Menlo,Consolas,monospace;
+
+  /* ---- 版式基准 ---- */
+  --qc-screen-w:393px;
+  --qc-screen-h:852px;
+  --qc-statusbar-h:62px;
+  --qc-tabbar-h:95px;
+
+  /* ---- 模型参数（实现与测试共用一个源，勿在别处硬编码） ---- */
+  --qc-model-saturation:5.2;   /* 危害分饱和参数 */
+  --qc-model-tar-baseline:9;   /* 焦油基准 mg / 支 */
+  --qc-model-lambda:0.12;      /* 负担指数吸收率 = 衰减率 */
+  --qc-model-half-life:5.42;   /* 半衰期（天） */
+  --qc-band-1:20;
+  --qc-band-2:40;
+  --qc-band-3:60;
+  --qc-band-4:80;
+}

@@ -62,7 +62,8 @@ for (const file of files) {
   }
 }
 
-for (let index = 1; index <= 11; index += 1) {
+const adrCount = 12;
+for (let index = 1; index <= adrCount; index += 1) {
   const id = String(index).padStart(3, '0');
   const matches = files.filter((file) =>
     path.basename(file).startsWith(`ADR-${id}-`),
@@ -96,4 +97,4 @@ if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exit(1);
 }
-console.log(`docs:lint ok (${files.length} markdown files, 11 ADRs)`);
+console.log(`docs:lint ok (${files.length} markdown files, ${adrCount} ADRs)`);

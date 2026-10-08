@@ -1,0 +1,132 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "cjs"
+  importFileExtension = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus {
+  ACTIVE
+  DELETION_PENDING
+  DELETED
+  SUSPENDED
+}
+
+enum DevicePlatform {
+  HARMONYOS
+  OTHER
+}
+
+enum DeviceStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum ChangeOperation {
+  UPSERT
+  DELETE
+}
+
+model User {
+  id          String              @id @default(uuid()) @db.Uuid
+  status      UserStatus          @default(ACTIVE)
+  locale      String              @default("zh-CN") @db.VarChar(16)
+  timezone    String              @default("Asia/Shanghai") @db.VarChar(64)
+  createdAt   DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime            @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?           @db.Timestamptz(3)
+  devices     Device[]
+  changes     ChangeLog[]
+  idempotency IdempotencyRecord[]
+  auditEvents AuditEvent[]
+
+  @@index([status])
+  @@map("users")
+}
+
+model Device {
+  id               String         @id @db.Uuid
+  userId           String         @db.Uuid
+  clientInstanceId String         @db.VarChar(128)
+  platform         DevicePlatform
+  appVersion       String         @db.VarChar(32)
+  status           DeviceStatus   @default(ACTIVE)
+  lastSeenAt       DateTime       @default(now()) @db.Timestamptz(3)
+  revokedAt        DateTime?      @db.Timestamptz(3)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(3)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clientInstanceId])
+  @@index([userId, status])
+  @@map("devices")
+}
+
+model ModelVersion {
+  id          String    @id @db.VarChar(64)
+  modelType   String    @db.VarChar(64)
+  parameters  Json
+  checksum    String    @db.VarChar(128)
+  effectiveAt DateTime  @db.Timestamptz(3)
+  retiredAt   DateTime? @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([modelType, effectiveAt])
+  @@map("model_versions")
+}
+
+model ChangeLog {
+  seq           BigInt          @id @default(autoincrement()) @db.BigInt
+  userId        String          @db.Uuid
+  entityType    String          @db.VarChar(64)
+  entityId      String          @db.Uuid
+  operation     ChangeOperation
+  entityVersion BigInt?         @db.BigInt
+  payload       Json?
+  serverTime    DateTime        @default(now()) @db.Timestamptz(3)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, seq])
+  @@index([userId, entityType, entityId, seq])
+  @@map("change_log")
+}
+
+model IdempotencyRecord {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  scope          String   @db.VarChar(64)
+  key            String   @db.VarChar(128)
+  requestHash    String   @db.VarChar(128)
+  responseStatus Int?
+  responseBody   Json?
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt      DateTime @db.Timestamptz(3)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scope, key])
+  @@index([expiresAt])
+  @@map("idempotency_records")
+}
+
+model AuditEvent {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String?  @db.Uuid
+  actorUserId  String?  @db.Uuid
+  action       String   @db.VarChar(128)
+  resourceType String?  @db.VarChar(64)
+  resourceId   String?  @db.Uuid
+  requestId    String?  @db.VarChar(64)
+  ipHash       String?  @db.VarChar(128)
+  metadata     Json?
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_events")
+}

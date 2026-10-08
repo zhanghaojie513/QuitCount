@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20261008T074421009Z-21704-dbbbb4b3ebe6",
+  "runId": "20261008T074421009Z-21704-dbbbb4b3ebe6",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "baseline_partial",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline capture had enumeration or snapshot errors",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline_partial: baseline capture had enumeration or snapshot errors",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "ae6293793447b39f7c76f5699e76a94a707c6f2d",
+  "diffHash": "64f8e5a145dda0f95d3264a3261cbf82984636bbcd9344155aeff6e7b727231a",
+  "rulesVersion": "unavailable",
+  "sessionHash": "ccf810d47855ae3cebb7bd1d058928a19dc7957daff633b3cadc8661909d4aa5",
+  "reportRef": ".mimosa/reports/task-review-sess_dabbd86f-ef80-430a-8bbb-081175b21cb7-20261008T074421009Z-21704-dbbbb4b3ebe6.json",
+  "events": [],
+  "observedFindingIds": [
+    "mimosa-3974a8f7456e7b8c1b6701df",
+    "mimosa-a5d5d1f63a4d9723efe7b8c3",
+    "mimosa-781aa9b6b240a175b8f4a66f"
+  ],
+  "verifiedFiles": [
+    {
+      "file": "screens.js",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app.js",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "qa/make-export-page.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "qa/make-browser-probe.py",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "qa/verify-regression-27.js",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-10-08T07:44:21.656Z"
+}

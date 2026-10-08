@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>戒烟有数 · 模型标定定稿（衰减项 + 5 档重算）</title>
+<style>
+  :root{
+    --ink:#1A211E; --sage:#38665F; --sage-mid:#4E8B7E; --sage-light:#6BA8A0;
+    --tint:#DFEBE5; --tint-soft:#F2F7F5; --cream:#F8F6F2; --line:#EDE9E1;
+    --muted:#8A948D; --muted-2:#9AA39D; --amber:#C26B32; --amber-bg:#FBEDE1;
+    --amber-soft:#F7DCCF; --warm:#B4553F;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#EFEDE8;font-family:"Noto Sans SC","PingFang SC",-apple-system,sans-serif;
+       color:var(--ink);padding:44px 32px 80px;-webkit-font-smoothing:antialiased;line-height:1.65;}
+  .page{max-width:1080px;margin:0 auto;}
+  h1{font-size:25px;font-weight:600;margin:0 0 6px;letter-spacing:-.3px;}
+  .sub{font-size:13px;color:#6D766F;margin:0 0 10px;}
+  .verdict-box{background:#EAF4F0;border:1px solid #C9E2D8;border-radius:14px;padding:16px 20px;
+               font-size:13px;color:#28544C;margin:20px 0 44px;}
+  .verdict-box b{color:#1E443E;}
+  .sec{margin-top:56px;}
+  h2{font-size:17px;font-weight:600;margin:0 0 6px;display:flex;align-items:center;gap:9px;}
+  h2 em{font-style:normal;font-size:11px;font-weight:500;color:#fff;background:var(--sage);
+        border-radius:6px;padding:2px 7px;}
+  h2 em.red{background:var(--warm);} h2 em.amber{background:var(--amber);}
+  .lead{font-size:13px;color:#6D766F;margin:0 0 22px;max-width:820px;}
+  table{border-collapse:separate;border-spacing:0;width:100%;background:#fff;border-radius:16px;
+        overflow:hidden;font-size:13px;box-shadow:0 4px 18px -10px rgba(26,33,30,.14);}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{background:#F5F3EF;font-weight:600;font-size:12px;color:#5A635D;}
+  tr:last-child td{border-bottom:0;}
+  td code,th code{background:#EFECE6;border-radius:5px;padding:1px 6px;font-size:12px;}
+  .num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600;}
+  .num.mut{font-weight:400;color:#8A948D;}
+  .hl-row td{background:#F2F7F5;}
+  .oldv{color:#9AA39D;text-decoration:line-through;}
+  .newv{color:var(--sage);font-weight:600;}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;}
+  .card{background:#fff;border-radius:18px;padding:18px 20px;box-shadow:0 4px 18px -10px rgba(26,33,30,.14);}
+  .card h4{margin:0 0 12px;font-size:12.5px;font-weight:600;color:#5A635D;display:flex;gap:8px;align-items:center;}
+  .card.dark{background:#2C3A35;color:#E8F0EC;}
+  .card.dark h4{color:#9DC4B5;}
+  .fml{background:var(--cream);border-radius:11px;padding:12px 14px;font-size:12.5px;
+       font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.9;color:#2C3531;margin:8px 0;}
+  .card.dark .fml{background:#22302B;color:#CFE3DA;}
+  .fml b{color:var(--sage);font-weight:700;}
+  .card.dark .fml b{color:#8FD0BA;}
+  .note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.7;}
+  .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;background:var(--tint-soft);
+       color:var(--sage);font-weight:600;}
+  .tag.bad{background:#FBEDE1;color:var(--amber);}
+  .tag.fix{background:#EAF2EF;color:var(--sage);}
+
+  /* 档位分层条 */
+  .ladder{display:flex;gap:4px;margin:8px 0 0;}
+  .ladder i{height:30px;border-radius:8px;display:block;}
+  .ladder-l{display:flex;gap:4px;margin-top:8px;}
+  .ladder-l span{font-size:10px;text-align:center;line-height:1.35;color:#5C6660;}
+  .ladder-l b{display:block;font-size:10.5px;color:var(--ink);}
+
+  /* 图表 */
+  .chartbox{background:#fff;border-radius:20px;padding:22px 24px 18px;
+            box-shadow:0 4px 20px -12px rgba(26,33,30,.16);}
+  .legend{display:flex;gap:22px;flex-wrap:wrap;margin:16px 0 0;font-size:12px;}
+  .legend span{display:flex;align-items:center;gap:7px;color:#5C6660;}
+  .legend i{width:16px;height:3px;border-radius:2px;display:block;}
+  .legend b{color:var(--ink);}
+  .chart-note{font-size:12px;color:#6D766F;margin-top:14px;padding-left:14px;border-left:2px solid var(--sage);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:820px){.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>模型标定定稿 · 衰减项 + 5 档重算</h1>
+  <p class="sub">危害分公式重标定 · 长期负担指数引入衰减 · 5 档阈值重新对齐 —— 本批把「健康净值」从镜像升级为可回升的真实指标</p>
+
+  <div class="verdict-box">
+    <b>一句话结论：</b>新模型下「今日 4 支」算出 <b>危害分 42.3</b>、长期负担指数 <b>42.3</b>、健康净值 <b>57.7 → 58%</b> —— 与现有设计稿里的数字<b>完全吻合</b>。也就是说这次重标定不需要改动任何演示数字的语义，只需要把「0 支 = 36 分」和「没超标却判高危」这两个硬伤修掉，再补上衰减。<br>
+    戒烟后净值 <b>每天涨约 4.4 个点</b>，14 天从 59% 回到 93%。
+  </div>
+
+  <!-- ============ §1 ============ -->
+  <div class="sec">
+    <h2>一、旧公式的三处硬伤 <em class="red">必须先说清</em></h2>
+    <div class="cards">
+
+      <div class="card">
+        <h4><span class="tag bad">硬伤 1</span>一支没抽，也有 36 分</h4>
+        <div class="fml">危害分 = 48 + (n − 2) × 6 + 修正
+n = 0 → 48 − 12 = <b>36 分</b></div>
+        <div class="note">基数 48 太高。用户当天刚打开 App、一支没抽，界面就告诉他「你已经 36 分」——这个数字没有任何行为依据，第一次看到就会怀疑整套模型。</div>
+      </div>
+
+      <div class="card">
+        <h4><span class="tag bad">硬伤 2</span>没超标，却被判「高危」</h4>
+        <div class="fml">n = 2 → <b>48 分</b> 已进「高危」段
+n = 4 → <b>64 分</b>（设计稿现值）</div>
+        <div class="note">首页同一屏里：横幅写「高危 · 当日危害 64」，下面写「目标每日少于 5 支」。用户<b>完全没超标</b>，却被自己的 App 判成高危。斜率也太平——每支只涨 6.3 分，抽 10 支才 101 分，与「越抽越危险」的直觉不符。</div>
+      </div>
+
+      <div class="card">
+        <h4><span class="tag bad">硬伤 3</span>只累积，从不衰减</h4>
+        <div class="fml">负担指数 只随取出累加
+无「不抽烟」的衰减项</div>
+        <div class="note">于是「健康净值」永远不会回升。用户戒烟三天打开 App，58% 纹丝不动——产品唯一一句「坚持会有回报」的承诺，在模型层面是**空的**。这一步是「按建议修改」的核心。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ §2 ============ -->
+  <div class="sec">
+    <h2>二、新模型 <em class="fix">三条公式</em></h2>
+    <p class="lead">三层结构：① 当日支数 → 饱和曲线；② 焦油做有上限的修正；③ 长期指数用指数加权平均吸收当日分，并天然带衰减。</p>
+
+    <div class="cards">
+      <div class="card dark">
+        <h4>① 当日危害分（重标定）</h4>
+        <div class="fml">危害分 = 100 × (1 − 0.5<sup>n / 5.2</sup>)
+        + clamp( (T − 9n) × 0.5, −5, +10 )</div>
+        <div class="note" style="color:#9DC4B5;">
+          <b>饱和曲线</b>：n = 0 时恰好为 0；每多抽 5.2 支，剩余部分减半 —— 前几支涨得最猛，符合剂量-反应直觉，而不会像旧公式那样接近线性。<br>
+          <b>焦油修正</b>：以 9mg/支 为基准，只做 ±5 / +10 的有限修正，避免高焦油品牌把档位整段抬高。
+        </div>
+      </div>
+
+      <div class="card dark">
+        <h4>② 长期负担指数（新增衰减）</h4>
+        <div class="fml">负担指数(d) = 0.88 × 负担指数(d−1)
+              + 0.12 × 危害分(d)</div>
+        <div class="note" style="color:#9DC4B5;">
+          这就是指数加权平均，<b>0.12 既是吸收率也是衰减率</b>。它带来两个自动的好性质：<br>
+          ① 稳态时 <b>负担指数 ≈ 当日危害分的日常水平</b>，两个数字可以直接互相解释；<br>
+          ② 危害分为 0 的日子会自然把指数往下拉 —— <b>戒烟不需要额外写衰减逻辑</b>，衰减是这套平均的自带属性。
+        </div>
+      </div>
+
+      <div class="card dark">
+        <h4>③ 健康净值</h4>
+        <div class="fml">健康净值 = clamp(100 − 负担指数, 0, 100)</div>
+        <div class="note" style="color:#9DC4B5;">
+          保持原定义不变。但因为它现在挂在一个<b>会衰减的负担指数</b>上，净值终于会回升了 —— 第 ② 条公式就是「按建议修改」里选的那条路。<br><br>
+          <b>衰减半衰期 = 5.42 天</b>（`ln 0.5 / ln 0.88`）。这个数字是刻意的：够快，一周内用户就能看见变化；够慢，不至于抽一支就抹掉三天的坚持。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ §3 ============ -->
+  <div class="sec">
+    <h2>三、5 档阈值重算 <em class="amber">对齐</em></h2>
+    <p class="lead">档位阈值定在 20 / 40 / 60 / 80。判据只有一条：<b>用户正好达到自设目标时，必须落在「中等」正中间，不能靠近任何一条边界。</b></p>
+
+    <div class="ladder" style="margin-bottom:6px;">
+      <i style="flex:20;background:#EAF2EF;"></i>
+      <i style="flex:20;background:#DCEBE3;"></i>
+      <i style="flex:20;background:#8FC4B5;"></i>
+      <i style="flex:20;background:#E4B58F;"></i>
+      <i style="flex:20;background:#C26B32;"></i>
+    </div>
+    <div class="ladder-l">
+      <span style="flex:20;"><b>轻负担</b>0 – 19</span>
+      <span style="flex:20;"><b>偏低</b>20 – 39</span>
+      <span style="flex:20;"><b>中等</b>40 – 59</span>
+      <span style="flex:20;"><b>偏高</b>60 – 79</span>
+      <span style="flex:20;"><b>重负担</b>80 – 100</span>
+    </div>
+
+    <table style="margin-top:26px;">
+      <thead><tr>
+        <th style="width:80px;">当日支数</th>
+        <th style="width:110px;">旧危害分</th>
+        <th style="width:110px;">新危害分</th>
+        <th style="width:110px;">新档位</th>
+        <th>说明</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>0 支</td><td class="num mut oldv">36.0</td><td class="num newv">0.0</td><td>轻负担</td><td>修掉硬伤 1：没抽就是 0，符合直觉</td></tr>
+        <tr><td>1 支</td><td class="num mut oldv">43.0</td><td class="num">12.5</td><td>轻负担</td><td>旧模型一支就跨进「关注」</td></tr>
+        <tr><td>2 支</td><td class="num mut oldv">50.1</td><td class="num">23.4</td><td>偏低</td><td>旧模型 2 支已进「高危」段</td></tr>
+        <tr><td>3 支</td><td class="num mut oldv">57.1</td><td class="num">33.0</td><td>偏低</td><td></td></tr>
+        <tr class="hl-row"><td><b>4 支</b></td><td class="num mut oldv">64.2</td><td class="num newv">41.3</td><td><b>中等</b></td><td><b>修掉硬伤 2</b>：设计稿现值 64「高危」→ 41「中等」</td></tr>
+        <tr class="hl-row"><td><b>5 支</b><br><span style="font-size:11px;color:#8A948D;">＝默认目标</span></td><td class="num mut oldv">71.0</td><td class="num newv">48.6</td><td><b>中等</b></td><td><b>关键校验点</b>：正好达标 → 落在「中等」区间中部（40–59），离上下边界都留出 8 分以上余量</td></tr>
+        <tr><td>6 支</td><td class="num mut oldv">77.8</td><td class="num">55.1</td><td>中等</td><td>刚超目标 1 支，仍在中等</td></tr>
+        <tr><td>7 支</td><td class="num mut oldv">84.8</td><td class="num">60.7</td><td>偏高</td><td>越过目标 2 支，进入「偏高」</td></tr>
+        <tr><td>10 支</td><td class="num mut oldv">101.0</td><td class="num">73.6</td><td>偏高</td><td>旧模型已满分溢出</td></tr>
+        <tr><td>13 支</td><td class="num mut">—</td><td class="num">82.3</td><td>重负担</td><td>17 屏强化干预的新触发区</td></tr>
+        <tr><td>20 支</td><td class="num mut">—</td><td class="num">93.0</td><td>重负担</td><td>曲线饱和但不封顶，避免「抽再多也一样」</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:12px;">表中「旧危害分」按旧公式复算，n = 4 得 64.2，与设计稿现值 64 一致 —— 说明这份复算准确还原了原模型，对比可信。</div>
+  </div>
+
+  <!-- ============ §4 ============ -->
+  <div class="sec">
+    <h2>四、14 天验证：行为有没有被奖励 <em class="fix">关键</em></h2>
+    <p class="lead">模型改完必须回答一个问题：<b>用户做对了事，数字会不会动？</b> 下面三条曲线用同一个模型跑 14 天。</p>
+
+    <div class="chartbox">
+      <svg viewBox="0 0 660 250" width="100%" style="max-width:660px;">
+        <!-- 档位参考线 -->
+        <line x1="34" y1="179.6" x2="626" y2="179.6" stroke="#EDE9E1" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="34" y1="143.2" x2="626" y2="143.2" stroke="#EDE9E1" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="34" y1="106.8" x2="626" y2="106.8" stroke="#EDE9E1" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="34" y1="70.4"  x2="626" y2="70.4"  stroke="#EDE9E1" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="630" y="183" font-size="9" fill="#9AA39D">20 偏低</text>
+        <text x="630" y="146" font-size="9" fill="#9AA39D">40 中等</text>
+        <text x="630" y="110" font-size="9" fill="#9AA39D">60 偏高</text>
+        <text x="630" y="74"  font-size="9" fill="#9AA39D">80 重负担</text>
+        <!-- 轴 -->
+        <line x1="34" y1="216" x2="626" y2="216" stroke="#E4E0D8" stroke-width="1"/>
+        <text x="34"  y="234" font-size="10" fill="#9AA39D">第 1 天</text>
+        <text x="300" y="234" font-size="10" fill="#9AA39D">第 7 天</text>
+        <text x="600" y="234" font-size="10" fill="#9AA39D">第 14 天</text>
+        <!-- 曲线 -->
+        <polyline fill="none" stroke="#C26B32" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"
+          points="34.0,207.0 79.5,199.0 125.1,192.0 170.6,185.9 216.2,180.5 261.7,175.7 307.2,171.5 352.8,167.8 398.3,164.6 443.8,161.7 489.4,159.2 534.9,157.0 580.5,155.1 626.0,153.4"/>
+        <polyline fill="none" stroke="#4E8B7E" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"
+          points="34.0,199.9 79.5,187.5 125.1,178.9 170.6,172.7 216.2,168.9 261.7,167.4 307.2,168.1 352.8,168.7 398.3,171.7 443.8,174.3 489.4,179.3 534.9,183.7 580.5,187.6 626.0,191.0"/>
+        <polyline fill="none" stroke="#38665F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"
+          points="34.0,151.2 79.5,159.0 125.1,165.9 170.6,171.9 216.2,177.2 261.7,181.8 307.2,185.9 352.8,189.5 398.3,192.7 443.8,195.5 489.4,198.0 534.9,200.1 580.5,202.0 626.0,203.7"/>
+        <circle cx="626" cy="153.4" r="3.4" fill="#C26B32"/>
+        <circle cx="307.2" cy="168.1" r="3.4" fill="#4E8B7E"/>
+        <circle cx="626" cy="203.7" r="3.4" fill="#38665F"/>
+      </svg>
+
+      <div class="legend">
+        <span><i style="background:#C26B32;"></i><b>一直每天 4 支</b> —— 第 14 天负担指数 34.4，还在往上爬</span>
+        <span><i style="background:#4E8B7E;"></i><b>十支起步、逐步减到 0</b> —— 第 6 天见顶 26.7，之后掉头向下</span>
+        <span><i style="background:#38665F;"></i><b>稳定在 4 支后彻底戒烟</b> —— 从 40.4 一路降到 6.8</span>
+      </div>
+
+      <div class="chart-note">
+        三件事被验证了：<br>
+        ① <b>不改变行为，数字不会自己变好</b>（橙线一直在涨）—— 指标没有作弊；<br>
+        ② <b>减少就会掉头</b>（绿线第 6 天见顶）—— 用户第一次能在图上看见自己的努力；<br>
+        ③ <b>戒烟真的能恢复</b>（深绿线 14 天从 59% 到 93% 净值）—— 这正是「健康净值」这个名字一开始承诺、但旧模型给不了的东西。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ §5 ============ -->
+  <div class="sec">
+    <h2>五、连带影响：这些演示数字必须重算 <em class="red">别漏</em></h2>
+    <p class="lead">模型一动，所有引用危害分的画面都会变。以下是画布上必须同步的位置——不改就会出现「弹层说 71、首页说 42」的自相矛盾。</p>
+
+    <table>
+      <thead><tr><th style="width:210px;">位置</th><th style="width:190px;">现值</th><th style="width:190px;">新值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>首页 危害横幅（<code>2:119</code>）</td>
+          <td class="num mut oldv">中等负担 · 当日危害 64</td>
+          <td class="num newv">中等负担 · 当日危害 42</td>
+          <td>档位不变（仍「中等」），分数重算</td>
+        </tr>
+        <tr>
+          <td>首页 近期负担指数<br><span style="font-size:11px;color:#8A948D;">（原「肺部负担指数」）</span></td>
+          <td class="num mut">42.3 / 100</td>
+          <td class="num newv">42.3 / 100</td>
+          <td>数值不变，<b>但要改名</b>（见 §8）：稳态下负担指数 ≈ 当日分，两个数字会相等，这是模型自洽的表现，不是 bug</td>
+        </tr>
+        <tr>
+          <td>健康净值（首页／我的／空状态）</td>
+          <td class="num mut">58%</td>
+          <td class="num newv">58%</td>
+          <td>100 − 42.3 = 57.7 → 58%，<b>刚好不用改</b></td>
+        </tr>
+        <tr>
+          <td>10 屏 结果卡</td>
+          <td class="num mut oldv">64 · 高危</td>
+          <td class="num newv">42 · 中等</td>
+          <td>5 段等级条仍高亮第 3 段，但阈值改为 20/40/60/80</td>
+        </tr>
+        <tr>
+          <td>08 屏 取出弹层成本卡</td>
+          <td class="num mut oldv">当日危害 64 → 71</td>
+          <td class="num newv">当日危害 42 → 49</td>
+          <td>焦油 +8mg、健康折算 +¥3.44 <b>不变</b></td>
+        </tr>
+        <tr>
+          <td>17 屏 强化干预弹层</td>
+          <td class="num mut oldv">92 · 11 支</td>
+          <td class="num newv">86 · 13 支</td>
+          <td><b>要注意</b>：新公式下 11 支只有 79.7 分，够不到「重负担」，17 屏的演示支数需上调到 13 支</td>
+        </tr>
+        <tr>
+          <td>03 屏 常规警示弹层</td>
+          <td class="num mut oldv">高危</td>
+          <td class="num newv">按触发时的实际档位显示</td>
+          <td>档位标签不再硬编码，随分数取值走</td>
+        </tr>
+        <tr>
+          <td>09 屏 调整目标 · 收益提示</td>
+          <td class="num mut">每减少 1 支 ≈ 降 ¥2.8</td>
+          <td class="num newv">每减少 1 支 ≈ 降 ¥3.9</td>
+          <td>按新曲线在 4–5 支区间的边际斜率重算</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ §6 ============ -->
+  <div class="sec">
+    <h2>六、画布施工单（本批） <em class="fix">待执行</em></h2>
+    <table>
+      <thead><tr><th style="width:46px;">步</th><th style="width:170px;">节点</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>M1</td><td><code>2:119</code> 危害横幅标题</td><td>文案 → <code>中等负担 · 当日危害 42</code></td></tr>
+        <tr><td>M2</td><td><code>10</code> 屏 结果卡</td><td>分数 <code>64</code> → <code>42</code>；5 段等级条阈值改 20/40/60/80；文案 <code>轻负担 · 偏低 · 中等 · 偏高 · 重负担</code></td></tr>
+        <tr><td>M3</td><td><code>10</code> 屏 公式卡</td><td>替换为两条新公式（饱和曲线 + 焦油修正），并在结果卡后<b>新增「净值卡」</b>：<code>健康净值 = 100 − 负担指数</code></td></tr>
+        <tr><td>M4</td><td><code>10</code> 屏 变量卡</td><td>新增一行 <code>长期负担指数 42.3（含衰减 · 半衰期 5.4 天）</code></td></tr>
+        <tr><td>M5</td><td><code>3:1014</code> 附近 08 弹层成本卡</td><td>文案 → <code>取出「云烟 细支」后：当日危害 42 → 49</code></td></tr>
+        <tr><td>M6</td><td><code>17</code> 屏弹层双指标</td><td><code>92 / 11 支</code> → <code>86 / 13 支</code>；背景首页数字同步（库存 17 → 4 支）</td></tr>
+        <tr><td>M7</td><td><code>09</code> 屏收益提示</td><td><code>约降 ¥2.8</code> → <code>约降 ¥3.9</code></td></tr>
+        <tr><td>M8</td><td>03 / 04 屏档位标签</td><td>改为随实际分数取值，不再硬编码</td></tr>
+        <tr><td>M9</td><td>首页 <code>Hero</code> 指标名</td><td><code>肺部负担指数</code> → <b><code>近期负担指数</code></b>，并补副标 <code>按最近两周的取出记录计算</code>（见 §7 · 命名必须与时间尺度一致）</td></tr>
+        <tr><td>M10</td><td>首页 肺插画注脚</td><td><code>每取出一支 · 肺色加深 1.9%</code> 与两周窗口对齐，改为 <code>近两周每取出一支 · 肺色加深 1.9%</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ §7 ============ -->
+  <div class="sec">
+    <h2>七、半衰期定稿：λ = 0.12 <em class="fix">分析结论</em></h2>
+    <p class="lead">这个数不该凭手感挑。三个候选跑完，只有一个能同时满足「第一天看得见」和「走完整个戒断期才归零」。</p>
+
+    <table>
+      <thead><tr>
+        <th style="width:110px;">吸收/衰减率 λ</th>
+        <th style="width:110px;">半衰期</th>
+        <th style="width:110px;">戒烟 1 天</th>
+        <th style="width:110px;">7 天</th>
+        <th style="width:110px;">14 天</th>
+        <th style="width:130px;">达 95% 净值需</th>
+        <th>判定</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>0.16</td><td>4.0 天</td><td class="num">64.5%</td><td class="num">87.5%</td><td class="num">96.3%</td>
+          <td class="num">17.2 天</td>
+          <td><b>太快</b>：用户还没走完戒断期（第 3 天与第 2 周是复发高峰），指标就已经"到顶"了，显得轻飘</td>
+        </tr>
+        <tr class="hl-row">
+          <td><b>0.12</b></td><td><b>5.4 天</b></td><td class="num newv">62.8%</td><td class="num newv">82.7%</td><td class="num newv">92.9%</td>
+          <td class="num newv"><b>23.4 天</b></td>
+          <td><b>采用</b>：23.4 天 ≈ 戒烟领域最公认的「21 天」心理锚点</td>
+        </tr>
+        <tr>
+          <td>0.085</td><td>7.8 天</td><td class="num">61.3%</td><td class="num">77.3%</td><td class="num">87.8%</td>
+          <td class="num">33.7 天</td>
+          <td><b>太慢</b>：超出「一个月」这个心理期限，用户容易在「看到头」之前放弃</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cards" style="margin-top:24px;">
+      <div class="card">
+        <h4><span class="tag">第一天的可见性</span>不区分候选</h4>
+        <div class="note" style="margin-top:0;">三个候选戒烟 1 天都能涨 3.6 – 6.8 个百分点，**都足够可见**。所以"能不能立刻看到反馈"这条不构成判据 —— 真正区分它们的是<b>什么时候停下来</b>。</div>
+      </div>
+      <div class="card">
+        <h4><span class="tag">唯一的判据</span>走完戒断期才到顶</h4>
+        <div class="note" style="margin-top:0;">净值达到 95%（用户第一次产生「我做到了」的完成感）所需的天数，应当覆盖完整的戒断与习惯重建过程。太早到顶 = 指标在用户还没真正过关时就宣布胜利；太晚 = 用户等不到那一刻。<b>23.4 天与「21 天」几乎重合，这不是巧合式的取整，而是把参数锚到一个真实的行为事实上。</b></div>
+      </div>
+      <div class="card dark">
+        <h4>定稿参数</h4>
+        <div class="fml">λ = 0.12
+半衰期 5.42 天
+净值达 95% 需 23.4 天</div>
+        <div class="note" style="color:#9DC4B5;">这个值与原设计稿的演示数字（42.3 / 58%）完全自洽，<b>不需要重算任何数字</b>——这也是它优于另外两个候选的附带好处。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ §8 ============ -->
+  <div class="sec">
+    <h2>八、连带修正：这个指标的名字必须改 <em class="red">不做就会自相矛盾</em></h2>
+    <p class="lead">λ 一确定为天级，就暴露出一个名称与模型对不上的问题。这是分析推导出来的结论，不是措辞偏好。</p>
+
+    <div class="grid2">
+      <div class="card" style="box-shadow:0 0 0 1.5px #F0DFC6;">
+        <h4><span class="tag bad">矛盾</span>名字说"肺部"，模型却是"近两周"</h4>
+        <p style="font-size:13px;color:#5A635D;margin:0 0 10px;">
+          首页那颗大数字叫 <b>「肺部负担指数」</b>，字面指向<b>常年累积的肺部损伤</b>——这种伤害在生理上是以年为单位变化的。<br>
+          但它的模型现在是半衰期 5.4 天的指数加权平均，<b>戒烟三周就基本清零</b>。一个"肺部损伤"三周归零，任何懂一点的用户都会立刻不信这个产品。
+        </p>
+        <p style="font-size:13px;color:#5A635D;margin:0;">
+          两条出路：<b>①</b> 拆成快慢两个指数——但首页会同时出现 42.3 与 58% 两个几乎一样的数字，更难解释，还会推翻已定稿的 5 档体系；<b>② 把名字改成与时间尺度一致。</b>
+        </p>
+      </div>
+      <div class="card" style="box-shadow:0 0 0 1.5px #C9E2D8;">
+        <h4><span class="tag fix">采用</span>② 改名字，成本一行</h4>
+        <p style="font-size:13px;color:#5A635D;margin:0 0 10px;">
+          <span class="oldv">肺部负担指数</span> → <b class="newv">近期负担指数</b>，并补一行副标 <code>按最近两周的取出记录计算</code>。
+        </p>
+        <p style="font-size:13px;color:#5A635D;margin:0 0 10px;">
+          改完之后三个数字的关系<b>第一次变得可以互相解释</b>：近期负担指数 42.3 → 健康净值 = 100 − 42.3 = 58% → 同一屏里的「中等」胶囊与当日危害分同源同档。
+        </p>
+        <p style="font-size:13px;color:#5A635D;margin:0;">
+          而真正「长期累积」的那层语义，交给已有的 <b>累计焦油 / 累计花费</b> 统计和 01、10 屏的免责声明承担——本来就已经在哪儿了，不需要再造一个指标。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="verdict-box" style="margin-top:52px;">
+    <b>本批全部定稿，无遗留待决项。</b>3 条公式 + 10 处画布改动（M1–M10）。<br>
+    核心参数：危害分饱和参数 <b>5.2</b>、焦油基准 <b>9 mg/支</b>、长期指数吸收/衰减率 <b>λ = 0.12</b>（半衰期 5.42 天，23.4 天达 95%）、5 档阈值 <b>20 / 40 / 60 / 80</b>。<br>
+    下一步只剩把它落进画布 —— 本会话到不了画布，需在设计会话里执行。
+  </div>
+
+</div>
+</body>
+</html>

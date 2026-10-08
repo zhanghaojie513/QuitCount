@@ -1,0 +1,79 @@
+{
+  "$description": "戒烟有数 · 设计 token（W3C DTCG）。语义规则见 design-spec.md 第 2 节。",
+  "color": {
+    "brand": {
+      "sage-900": { "$type": "color", "$value": "#38665F", "$description": "正向 / 产品背书。实心主按钮、激活态 Tab" },
+      "sage-700": { "$type": "color", "$value": "#4E8B7E", "$description": "正向的次级表达" },
+      "sage-500": { "$type": "color", "$value": "#6BA8A0", "$description": "进度条填充、图表正向柱" },
+      "sage-200": { "$type": "color", "$value": "#DFEBE5", "$description": "中性动作按钮底（取出家族）" },
+      "sage-100": { "$type": "color", "$value": "#F2F7F5", "$description": "提示条 / 反馈条底" }
+    },
+    "surface": {
+      "cream": { "$type": "color", "$value": "#F8F6F2", "$description": "页面底色" },
+      "card": { "$type": "color", "$value": "#FFFFFF", "$description": "卡片 / 弹层" },
+      "line": { "$type": "color", "$value": "#E4E0D8", "$description": "卡片与次要按钮描边" },
+      "line-soft": { "$type": "color", "$value": "#EDE9E1", "$description": "分隔线" }
+    },
+    "text": {
+      "ink": { "$type": "color", "$value": "#1A211E", "$description": "正文与数值。只做文字色，不做填充色" },
+      "muted": { "$type": "color", "$value": "#67726C", "$description": "2026-10-08 加深（原 #8A948D 白底 3.1:1 不达 AA）；现白底 4.98 / 奶油底 4.61" },
+      "muted-light": { "$type": "color", "$value": "#6E7973", "$description": "2026-10-08 加深（原 #9AA39D 白底 2.6:1）；现白底 4.51" },
+      "disabled": { "$type": "color", "$value": "#C6CFC9" }
+    },
+    "cost": {
+      "amber": { "$type": "color", "$value": "#C26B32", "$description": "代价 / 警告。危害分、成本、标识燃点。固定语义" },
+      "amber-bg": { "$type": "color", "$value": "#FBEDE1" },
+      "amber-ink": { "$type": "color", "$value": "#8A4A1C", "$description": "琥珀底上的深琥珀文字（预测条 / 口径提示）" },
+      "warm": { "$type": "color", "$value": "#B4553F", "$description": "不推荐但可执行（仍要取出 / 删除 / 清空）" },
+      "warm-soft": { "$type": "color", "$value": "#A5765C" }
+    }
+  },
+  "semantic": {
+    "bg-page": { "$type": "color", "$value": "{color.surface.cream}" },
+    "bg-card": { "$type": "color", "$value": "{color.surface.card}" },
+    "text-primary": { "$type": "color", "$value": "{color.text.ink}" },
+    "text-secondary": { "$type": "color", "$value": "{color.text.muted}" },
+    "text-tertiary": { "$type": "color", "$value": "{color.text.muted-light}" },
+    "action-primary": { "$type": "color", "$value": "{color.brand.sage-900}", "$description": "推荐选项，同屏唯一" },
+    "action-primary-fg": { "$type": "color", "$value": "#FFFFFF" },
+    "action-neutral-bg": { "$type": "color", "$value": "{color.brand.sage-200}" },
+    "action-neutral-fg": { "$type": "color", "$value": "{color.brand.sage-900}" },
+    "action-caution-fg": { "$type": "color", "$value": "{color.cost.warm}" },
+    "cost": { "$type": "color", "$value": "{color.cost.amber}" },
+    "cost-bg": { "$type": "color", "$value": "{color.cost.amber-bg}" }
+  },
+  "radius": {
+    "card": { "$type": "dimension", "$value": "22px" },
+    "card-lg": { "$type": "dimension", "$value": "24px" },
+    "button": { "$type": "dimension", "$value": "16px" },
+    "field": { "$type": "dimension", "$value": "14px" },
+    "pill": { "$type": "dimension", "$value": "999px" },
+    "sheet": { "$type": "dimension", "$value": "28px" }
+  },
+  "space": {
+    "gutter": { "$type": "dimension", "$value": "20px" },
+    "gap": { "$type": "dimension", "$value": "14px" },
+    "pad-card": { "$type": "dimension", "$value": "16px" }
+  },
+  "shadow": {
+    "card": { "$type": "shadow", "$value": { "offsetX": "0px", "offsetY": "6px", "blur": "18px", "spread": "-4px", "color": "rgba(158,184,174,.20)" } }
+  },
+  "font": {
+    "cn": { "$type": "fontFamily", "$value": ["Noto Sans SC", "PingFang SC", "sans-serif"] },
+    "num": { "$type": "fontFamily", "$value": ["Inter", "SF Pro Display", "sans-serif"] },
+    "mono": { "$type": "fontFamily", "$value": ["ui-monospace", "Menlo", "Consolas", "monospace"] }
+  },
+  "layout": {
+    "screen-w": { "$type": "dimension", "$value": "393px" },
+    "screen-h": { "$type": "dimension", "$value": "852px" },
+    "statusbar-h": { "$type": "dimension", "$value": "62px" },
+    "tabbar-h": { "$type": "dimension", "$value": "95px" }
+  },
+  "model": {
+    "saturation": { "$type": "number", "$value": 5.2, "$description": "危害分饱和参数" },
+    "tar-baseline": { "$type": "number", "$value": 9, "$description": "焦油基准 mg/支" },
+    "lambda": { "$type": "number", "$value": 0.12, "$description": "负担指数吸收率 = 衰减率" },
+    "half-life-days": { "$type": "number", "$value": 5.42 },
+    "bands": { "$type": "number[]", "$value": [20, 40, 60, 80], "$description": "轻负担 / 偏低 / 中等 / 偏高 / 重负担" }
+  }
+}

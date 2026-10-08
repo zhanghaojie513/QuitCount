@@ -1,0 +1,13 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>戒烟有数 · 主标识（光底版）</title>
+  <desc>四根递减的圆头刻度柱 + 一条基座线；最高一根的顶端是琥珀色燃点。语义：一支烟正在被读数。</desc>
+  <!-- 基座（账本横轴） -->
+  <line x1="10" y1="74" x2="86" y2="74" stroke="#C6D5CF" stroke-width="4" stroke-linecap="round"/>
+  <!-- 刻度柱：高度按衰减曲线递减，不是等差 -->
+  <rect x="8" y="20" width="14" height="52" rx="7" fill="#38665F"/>
+  <rect x="30" y="34" width="14" height="38" rx="7" fill="#38665F"/>
+  <rect x="52" y="46" width="14" height="26" rx="7" fill="#38665F"/>
+  <rect x="74" y="56" width="14" height="16" rx="7" fill="#38665F"/>
+  <!-- 燃点：唯一强调色，沿用「琥珀 = 代价」语义 -->
+  <path d="M8 37 L8 27 A7 7 0 0 1 22 27 L22 37 Z" fill="#C26B32"/>
+</svg>

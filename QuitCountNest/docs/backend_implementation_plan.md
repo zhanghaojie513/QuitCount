@@ -1,6 +1,6 @@
 # 戒烟有数后端分阶段实施计划
 
-> 状态：执行记录，2026-07-15。Stage 0 已完成；Stage 1 工程、质量、OpenAPI diff、容器和 CI 配置已实现，本机因缺少 Docker CLI 未完成容器运行，远端 GitHub Actions 也未触发。数据库迁移和领域业务尚未开始。
+> 状态：执行记录，2026-07-24。Stage 0 已完成；Stage 1 工程与本地门禁已实现，容器运行和远端 CI 仍待补验；Stage 2 平台基础正在实施。用户已确认拥有华为云账号并将华为云作为优先部署平台，但地域、资源、域名、生产网络与 PostgreSQL 托管版本尚未确认。
 
 ## 1. 计划目标与边界
 
@@ -60,7 +60,7 @@
 - [x] 用 Harmony fixtures 演示 take、return、retire、重复 push、乱序依赖、默认资产冲突、墓碑和游标过期。
 - [x] 完成 ADR-010（资产双版本与默认资产用户行锁）和 ADR-011（bootstrap 水位、永久事件去重与依赖组事务）。
 - [x] 完成威胁建模与数据分类，确认只有在用户明确授权同步后才可上传 P3/P4 本地数据。
-- [x] 决定 Node 24/NestJS 11/PostgreSQL 18/Prisma/OpenAPI 3.0.3 基线；认证供应商、部署平台保持待确认且未被虚构。
+- [x] 决定 Node 24/NestJS 11/PostgreSQL 18/Prisma/OpenAPI 3.0.3 基线；认证供应商保持待确认。2026-07-24 已确认优先部署到华为云，具体服务拓扑与 RDS 17/自管 PostgreSQL 18 决策见 ADR-012。
 
 建议范围：`docs/backend_*.md`、`docs/adr/*.md`、`openapi/backend-v1.yaml`、`openapi/examples/*.json`、`docs/error_catalog.md`。
 
@@ -134,7 +134,7 @@ docker run --rm --name quit-count-api -p 3000:3000 quit-count-api:stage1
 
 - **目标**：提供可验证的运行基础，尚不开放账户或领域写 API。
 - **输入**：数据库/ORM ADR、配置分类、可观测性与 SLO 草案。
-- **依赖**：Stage 1 完成；可用的本地 PostgreSQL/容器环境。
+- **依赖**：Stage 1 完成；可用的本地 PostgreSQL/容器环境。华为云托管数据库若采用 RDS，需先接受 ADR-012 的 PostgreSQL 17 调整；不得拿 PostgreSQL 18 migration 未经验证直接上线 RDS 17。
 
 ### 实现内容与文件范围
 
@@ -382,8 +382,8 @@ npm run backup:restore:smoke
 ### 目标与输入
 
 - **目标**：完成选择性同步联调、性能/故障验证、部署 runbook 和受控发布；手机本地模式仍可独立工作。
-- **输入**：全部前序报告、已批准环境/域名/证书/监控、Harmony 联调构建、发布清单。
-- **依赖**：Stage 0–7 完成；测试/预发布环境真实存在。当前这些环境均未确认。
+- **输入**：全部前序报告、已批准的华为云环境/域名/证书/监控、Harmony 联调构建、发布清单。
+- **依赖**：Stage 0–7 完成；华为云测试/预发布环境真实存在。当前只确认用户拥有华为云账号，地域、IAM、预算、配额、备案、域名和资源均未确认。
 
 ### 实现内容与文件范围
 
@@ -392,6 +392,10 @@ npm run backup:restore:smoke
 - [ ] 对常规 API、100/500 项 push、长账本 pull/bootstrap 压测，验证连接池、索引和 SLO。
 - [ ] 完成容器签名/SBOM（若平台支持）、migration job、灰度、监控告警、on-call、回滚 runbook。
 - [ ] 用 feature flag 小流量启用账户/同步；不把未登录用户强制迁移。
+- [ ] 接受 ADR-012：MVP 默认评估 `CAE + SWR + RDS for PostgreSQL 17 + LTS/AOM`；若使用 `CCE Autopilot/Standard` 或自管 PostgreSQL 18，记录成本、运维与恢复依据。
+- [ ] 用 IaC 创建隔离的 `dev/staging/prod` 华为云资源；配置 VPC/安全组、私网 RDS、IAM 最小权限、Secret 管理、日志保留和资源标签。禁止控制台手工创建后不回写 IaC。
+- [ ] GitHub Actions 只以 OIDC/短期凭据或受控部署身份推送 SWR 和发布，镜像使用 commit SHA/digest；禁止长期 AK/SK 明文写入仓库。
+- [ ] 在华为云执行 migration deploy、readiness、滚动升级、回退、数据库备份恢复、LTS 脱敏日志与 AOM/CES 告警演练。
 
 建议范围：Harmony network/sync adapter（在 Harmony 项目另行授权后修改）、后端 contract fixtures、load tests、deployment manifests、runbooks、dashboards。
 
@@ -401,7 +405,7 @@ npm run backup:restore:smoke
 
 ### 测试与验证命令
 
-以下为平台无关占位，具体命令由选定 CI/CD 与部署环境 ADR 替换：
+以下为平台无关的应用门禁；华为云资源命令由 ADR-012 接受后的 IaC 和部署 runbook 补充，不在资源尚未确认时虚构：
 
 ```powershell
 npm ci
@@ -453,13 +457,13 @@ npm run image:smoke
 
 | 决策 | 最晚确认阶段 | 未确认时处理 |
 | --- | --- | --- |
-| Node/Nest/PostgreSQL/ORM、OpenAPI 3.0.3 基线 | Stage 0 | 已由 ADR-002/003 和 OpenAPI 草案确认；Stage 2 复核真实托管兼容性。 |
+| Node/Nest/PostgreSQL/ORM、OpenAPI 3.0.3 基线 | Stage 0 | 已由 ADR-002/003 和 OpenAPI 草案确认；华为云 RDS 当前最高公开为 PostgreSQL 17，Stage 2 必须通过 ADR-012 选择 RDS 17 或自管 PostgreSQL 18。 |
 | 认证方式与供应商 | Stage 3 前 | 只做 provider-neutral 契约，不发送验证码。 |
 | 金额币种与舍入 | Stage 4 前 | 不导入历史金额。 |
 | 跨日 return、goal 范围 | Stage 5 前 | 契约标记未决，不实现猜测规则。 |
 | 游标/tombstone/幂等保留期 | Stage 6 前 | 不启动清理 job。 |
 | 删除冷静期、法定保留、RPO/RTO | Stage 7 前 | 高风险流程保持关闭。 |
-| 域名、地区、CI/CD、部署平台、SLO | Stage 8 前 | 只在本地/临时测试环境验证，不宣称上线。 |
+| 华为云地域、CAE/CCE、IAM、VPC、域名/备案、CI/CD 凭据、SLO | Stage 8 前 | 华为云已是优先平台；具体资源未确认前只在本地/临时测试环境验证，不宣称上线。 |
 
 ## 5. Stage 0 后的下一步（仅建议，不执行）
 

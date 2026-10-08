@@ -15,6 +15,7 @@
 | [ADR-009](./ADR-009-privacy-lifecycle.md) | 导出、删除、保留、备份 | proposed | 隐私/法务、运维负责人 | Stage 7 开始前 |
 | [ADR-010](./ADR-010-asset-versions-default-lock.md) | 资产双版本与默认资产锁 | accepted | 后端负责人、DBA | Stage 4 migration 前 |
 | [ADR-011](./ADR-011-bootstrap-dedup-dependencies.md) | bootstrap 水位、永久去重、依赖组 | accepted | 后端负责人、Harmony 负责人 | Stage 6 migration 前 |
+| [ADR-012](./ADR-012-huawei-cloud-deployment.md) | 华为云部署拓扑与 PostgreSQL 托管版本 | proposed | 项目负责人、后端负责人、运维负责人 | Stage 2 真实 RDS 连接前；最迟 Stage 8 资源创建前 |
 
 ## 维护规则
 
@@ -22,4 +23,3 @@
 - `accepted` ADR 的破坏性修改必须新建 ADR 并将旧记录标为 `superseded`。
 - `proposed` ADR 不得被实现成既定供应商、SLA 或合规承诺。
 - OpenAPI、迁移和代码若与 ADR 冲突，先停止实现并修正决策链。
-

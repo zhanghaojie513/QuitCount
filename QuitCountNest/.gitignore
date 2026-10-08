@@ -6,6 +6,7 @@
 /coverage
 .eslintcache
 /openapi/generated
+/src/generated/prisma
 
 # environment files
 .env

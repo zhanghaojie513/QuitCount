@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>戒烟有数 · 逐屏设计稿（27 屏）</title>
+<style>
+  :root{
+    --ink:#1A211E; --sage:#38665F; --sage-mid:#4E8B7E; --sage-light:#6BA8A0;
+    --tint:#DFEBE5; --tint-soft:#F2F7F5; --cream:#F8F6F2; --line:#E4E0D8;
+    --line-soft:#EDE9E1; --muted:#8A948D; --muted2:#9AA39D; --disabled:#C6CFC9;
+    --amber:#C26B32; --amber-bg:#FBEDE1; --warm:#B4553F; --warm-soft:#A5765C;
+    --bg:#EFEDE8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--ink);padding:0 32px 96px;
+       font-family:"Noto Sans SC","PingFang SC",-apple-system,sans-serif;line-height:1.7;
+       -webkit-font-smoothing:antialiased;}
+  .page{max-width:1180px;margin:0 auto;}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;background:#EFECE6;
+       border-radius:5px;padding:1px 6px;}
+
+  .cover{padding:64px 0 36px;}
+  .kicker{font-size:12px;letter-spacing:3px;color:var(--sage-mid);font-weight:600;}
+  h1{font-size:36px;font-weight:600;margin:12px 0 8px;letter-spacing:-.6px;}
+  .tag{font-size:15px;color:#5C6660;max-width:680px;margin:0 0 24px;}
+  .meta{display:flex;gap:34px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);}
+  .meta b{display:block;color:var(--ink);font-weight:600;font-size:13px;margin-top:2px;}
+  .note-top{background:#EAF4F0;border:1px solid #C9E2D8;border-radius:16px;padding:18px 22px;
+            font-size:13.5px;color:#28544C;margin:24px 0 0;}
+  .note-top b{color:#1E443E;}
+
+  h2{font-size:19px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:10px;}
+  h2 em{font-style:normal;font-size:11px;font-weight:500;color:#fff;background:var(--sage);
+        border-radius:6px;padding:2px 8px;}
+  h2 em.a{background:var(--amber);} h2 em.w{background:var(--warm);}
+  .sec{margin-top:60px;}
+  .lead{font-size:13.5px;color:#5C6660;margin:0 0 20px;max-width:900px;}
+
+  /* 索引 */
+  .idx{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;margin-top:6px;}
+  .idx a{display:flex;gap:8px;align-items:baseline;background:#fff;border:1px solid var(--line-soft);
+         border-radius:12px;padding:8px 11px;text-decoration:none;color:var(--ink);font-size:12.5px;}
+  .idx a:hover{border-color:var(--sage-light);}
+  .idx a i{font-style:normal;font-size:11px;font-weight:700;color:var(--sage-mid);
+           font-variant-numeric:tabular-nums;flex:none;}
+  .idx a.new{background:var(--tint-soft);}
+  .idx a.fix{background:#FFF8EE;}
+
+  /* 逐屏卡 */
+  .sc{background:#fff;border-radius:20px;padding:20px 22px;margin-top:14px;
+      box-shadow:0 4px 18px -14px rgba(26,33,30,.2);}
+  .sc.new{box-shadow:0 0 0 1.5px #C9E2D8,0 4px 18px -14px rgba(26,33,30,.2);}
+  .sc.flag{box-shadow:0 0 0 1.5px #F0DFC6,0 4px 18px -14px rgba(26,33,30,.2);}
+  .sc > header{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;flex-wrap:wrap;}
+  .sc .no{font-size:15px;font-weight:700;color:var(--sage);font-variant-numeric:tabular-nums;}
+  .sc h3{font-size:15.5px;font-weight:600;margin:0;}
+  .sc .role{font-size:12px;color:var(--muted);}
+  .sc .badges{margin-left:auto;display:flex;gap:6px;}
+  .sc .sub{font-size:12.5px;color:#6D766F;margin:0 0 14px;}
+  .cols{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:20px;}
+  @media(max-width:900px){.cols{grid-template-columns:1fr;}}
+  .cols h5{font-size:11.5px;font-weight:600;color:var(--sage-mid);margin:0 0 7px;
+           letter-spacing:.3px;text-transform:none;}
+  .cols ul{margin:0;padding-left:16px;font-size:12.5px;color:#5A635D;line-height:1.72;}
+  .cols li{margin-bottom:3px;}
+  .cols li b{color:var(--ink);}
+  .gap{margin:14px 0 0;font-size:12.5px;color:#7A5A32;background:#FFF8EE;border-radius:12px;
+       padding:11px 14px;line-height:1.7;}
+  .gap b{color:#5F4520;}
+  .ok{margin:14px 0 0;font-size:12.5px;color:#28544C;background:#EAF4F0;border-radius:12px;
+      padding:11px 14px;line-height:1.7;}
+  .ok b{color:#1E443E;}
+
+  .tagx{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;
+        background:var(--tint-soft);color:var(--sage);font-weight:600;white-space:nowrap;}
+  .tagx.bad{background:var(--amber-bg);color:var(--amber);}
+  .tagx.warn{background:#F7E7DE;color:var(--warm);}
+  .tagx.mute{background:#F0ECE4;color:#7C847E;}
+
+  table{border-collapse:separate;border-spacing:0;width:100%;background:#fff;border-radius:16px;
+        overflow:hidden;font-size:13px;box-shadow:0 4px 18px -14px rgba(26,33,30,.2);}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line-soft);vertical-align:top;}
+  th{background:#F5F3EF;font-weight:600;font-size:12px;color:#5A635D;}
+  tr:last-child td{border-bottom:0;}
+  .hl td{background:#F2F7F5;}
+  .num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600;}
+
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:10px;}
+  .sw{border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 3px 14px -10px rgba(26,33,30,.2);}
+  .sw .chip{height:44px;}
+  .sw .m{padding:7px 10px 9px;}
+  .sw .n{font-size:11px;font-weight:600;}
+  .sw .h{font-size:10px;color:var(--muted);font-family:ui-monospace,monospace;}
+  .rec{background:#EAF4F0;border:1px solid #C9E2D8;border-radius:16px;padding:18px 22px;
+       font-size:13.5px;color:#28544C;margin-top:20px;}
+  .rec b{color:#1E443E;}
+  footer{margin-top:70px;padding-top:22px;border-top:1px solid #E2DED6;font-size:11.5px;
+         color:var(--muted);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="cover">
+    <div class="kicker">DESIGN SPEC · SCREEN BY SCREEN</div>
+    <h1>戒烟有数 · 逐屏设计稿</h1>
+    <p class="tag">27 屏，逐屏给出结构、尺寸、文案、状态、数值推导与缺口。本文件为交付依据，实现与验收都以它为准。</p>
+    <div class="meta">
+      <div>屏幕<b>27 屏 · 393 × 852</b></div>
+      <div>模型<b>A1（饱和曲线 + EWMA 衰减）</b></div>
+      <div>基准<b>本文件 > design-spec.md > 旧原型</b></div>
+    </div>
+    <div class="note-top">
+      <b>关于基准：</b>画布作为编辑源仍然保留，但本文件是<b>读取与实现的唯一依据</b> —— 它比画布更容易逐条核对，也不受画布接口状态影响。
+      屏序按本文件的编号；画布上的节点 ID 附在各屏下方，仅用于需要回填时定位。
+    </div>
+  </div>
+
+  <!-- ============ 索引 ============ -->
+  <div class="sec">
+    <h2>屏索引</h2>
+    <div class="idx">
+      <a href="#s01"><i>01</i>账户与同步</a>
+      <a href="#s02"><i>02</i>首页</a>
+      <a href="#s03"><i>03</i>危害警示</a>
+      <a href="#s04"><i>04</i>资产</a>
+      <a href="#s05"><i>05</i>账本</a>
+      <a href="#s06"><i>06</i>我的</a>
+      <a href="#s07" class="fix"><i>07</i>设置</a>
+      <a href="#s08" class="fix"><i>08</i>取出弹层</a>
+      <a href="#s09"><i>09</i>调整戒烟目标</a>
+      <a href="#s10" class="fix"><i>10</i>危害模型与健康净值</a>
+      <a href="#s11"><i>11</i>添加香烟资产</a>
+      <a href="#s12" class="fix"><i>12</i>每日复盘提醒</a>
+      <a href="#s13" class="fix"><i>13</i>帮助与关于</a>
+      <a href="#s14"><i>14</i>清空库存确认</a>
+      <a href="#s15" class="fix"><i>15</i>首页 · 空状态</a>
+      <a href="#s16" class="fix"><i>16</i>通知展开态</a>
+      <a href="#s17"><i>17</i>重负担档警示</a>
+      <a href="#s18" class="fix"><i>18</i>通知权限兜底</a>
+      <a href="#s19" class="fix"><i>19</i>同步失败态</a>
+      <a href="#s20" class="fix"><i>20</i>关于 · 有新版本</a>
+      <a href="#s21"><i>21</i>记录明细</a>
+      <a href="#s22"><i>22</i>忍住反馈</a>
+      <a href="#s23" class="new"><i>23</i>取出成功</a>
+      <a href="#s24" class="new"><i>24</i>首页 · 今日 0 支</a>
+      <a href="#s25" class="new"><i>25</i>导出账本</a>
+      <a href="#s26" class="new"><i>26</i>隐私政策与用户协议</a>
+      <a href="#s27" class="new"><i>27</i>品牌详情</a>
+    </div>
+    <p style="font-size:11.5px;color:var(--muted);margin-top:12px;">
+      底色标记：<span class="tagx">新增</span> 本轮之前不存在 · <span class="tagx bad">已改</span> 本轮已落实修改的屏
+    </p>
+  </div>
+
+  <!-- ============ 设计系统 ============ -->
+  <div class="sec">
+    <h2>一、设计系统 <em>TOKENS</em></h2>
+    <p class="lead">全项目只有这一套色。铁律：<b>颜色按语义分配，不按美观分配</b> —— 每个颜色都独占一个含义，换色等于改语义。</p>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#38665F"></div><div class="m"><div class="n">品牌绿·深</div><div class="h">#38665F</div></div></div>
+      <div class="sw"><div class="chip" style="background:#4E8B7E"></div><div class="m"><div class="n">品牌绿·中</div><div class="h">#4E8B7E</div></div></div>
+      <div class="sw"><div class="chip" style="background:#6BA8A0"></div><div class="m"><div class="n">品牌绿·浅</div><div class="h">#6BA8A0</div></div></div>
+      <div class="sw"><div class="chip" style="background:#DFEBE5"></div><div class="m"><div class="n">鼠尾草浅底</div><div class="h">#DFEBE5</div></div></div>
+      <div class="sw"><div class="chip" style="background:#F2F7F5"></div><div class="m"><div class="n">极浅绿</div><div class="h">#F2F7F5</div></div></div>
+      <div class="sw"><div class="chip" style="background:#F8F6F2"></div><div class="m"><div class="n">奶油底</div><div class="h">#F8F6F2</div></div></div>
+      <div class="sw"><div class="chip" style="background:#E4E0D8"></div><div class="m"><div class="n">描边</div><div class="h">#E4E0D8</div></div></div>
+      <div class="sw"><div class="chip" style="background:#1A211E"></div><div class="m"><div class="n">墨色</div><div class="h">#1A211E</div></div></div>
+      <div class="sw"><div class="chip" style="background:#8A948D"></div><div class="m"><div class="n">中性灰</div><div class="h">#8A948D</div></div></div>
+      <div class="sw"><div class="chip" style="background:#9AA39D"></div><div class="m"><div class="n">中性灰·浅</div><div class="h">#9AA39D</div></div></div>
+      <div class="sw"><div class="chip" style="background:#C6CFC9"></div><div class="m"><div class="n">禁用</div><div class="h">#C6CFC9</div></div></div>
+      <div class="sw"><div class="chip" style="background:#C26B32"></div><div class="m"><div class="n">暖琥珀</div><div class="h">#C26B32</div></div></div>
+      <div class="sw"><div class="chip" style="background:#FBEDE1"></div><div class="m"><div class="n">琥珀底</div><div class="h">#FBEDE1</div></div></div>
+      <div class="sw"><div class="chip" style="background:#B4553F"></div><div class="m"><div class="n">暖褐</div><div class="h">#B4553F</div></div></div>
+      <div class="sw"><div class="chip" style="background:#A5765C"></div><div class="m"><div class="n">暖褐·浅</div><div class="h">#A5765C</div></div></div>
+    </div>
+    <table style="margin-top:20px;">
+      <thead><tr><th style="width:190px;">语义</th><th style="width:280px;">样式</th><th>用在哪</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td><b>正向 / 主按钮</b></td><td>实心 <code>#38665F</code> + 白内容</td><td>登录、先不抽、今天不再取出、保存类主按钮、激活态 Tab（<b>全 App 同时只应存在一颗实心绿按钮 + 一个实心绿 Tab</b>）</td></tr>
+        <tr><td><b>中性动作</b></td><td><code>#DFEBE5</code> 底 + <code>#38665F</code> 内容</td><td>「取出」家族：Tab 中间取出、模型胶囊；临时反馈条</td></tr>
+        <tr><td><b>不推荐但可执行</b></td><td>白底 + 描边 + 中性灰 / 暖褐</td><td>放回库存、仍要取出一支、清空库存、删除这条记录</td></tr>
+        <tr class="hl"><td><b>代价 / 警告</b></td><td>暖琥珀 <code>#C26B32</code> on <code>#FBEDE1</code></td><td>危害分、成本卡、肺部负担色块、标识燃点</td></tr>
+        <tr><td><b>墨色</b></td><td><code>#1A211E</code></td><td>正文与数值。<b>只做文字色，不做填充色</b></td></tr>
+      </tbody>
+    </table>
+    <table style="margin-top:16px;">
+      <thead><tr><th style="width:150px;">项</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>字体</td><td>中文 <code>Noto Sans SC</code>（Regular/Medium/SemiBold）；数字 <code>Inter</code>（Medium/SemiBold/Bold，开 tabular-nums）；公式等宽</td></tr>
+        <tr><td>圆角</td><td>卡片 <code>18–24</code> · 按钮/输入框 <code>14–16</code> · 胶囊 <code>999</code> · 底部弹层 <code>28</code></td></tr>
+        <tr><td>间距</td><td>屏边距 <code>20</code> · 卡片内边距 <code>16–18</code> · 卡片间距 <code>12–14</code></td></tr>
+        <tr><td>阴影</td><td>只有一层：<code>0 6 18 -4 rgba(158,184,174,.20)</code>。抬升即强调，次要元素不加影</td></tr>
+        <tr><td>版式</td><td>屏幕 <code>393 × 852</code> · 状态栏 <code>62</code> · Tab Bar <code>95</code>（5 项：首页 · 资产 · <b>取出</b> · 账本 · 我的）· 白色胶囊容器左右内缩 <code>22</code> / 高 <code>59</code> · 激活胶囊 <code>66 × 54</code></td></tr>
+        <tr><td>遮罩</td><td><b>强打断 50%</b>（03 / 14 警示弹层 · 底部弹层）· <b>弱打断 42%</b>（08 / 09 / 11 / 12 / 21 / 25 底部弹层）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 模型与口径 ============ -->
+  <div class="sec">
+    <h2>二、模型与数据口径 <em>MODEL</em></h2>
+    <p class="lead"><b>唯一权威。</b>任何界面数字与本节冲突，以本节为准。</p>
+    <table>
+      <thead><tr><th style="width:170px;">公式</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td><b>① 当日危害分</b></td><td><code>100 × (1 − 0.5^(n / 5.2)) + clamp((T − 9n) × 0.5, −5, +10)</code><br>n = 当日取支数，T = 当日焦油 mg。饱和参数 5.2，焦油基准 9mg/支。<b>n = 0 → 恰好 0</b></td></tr>
+        <tr class="hl"><td><b>② 近期负担指数</b></td><td><code>0.88 × 指数(d−1) + 0.12 × 危害分(d)</code><br>λ = 0.12 既是吸收率也是衰减率，半衰期 <b>5.42 天</b>，23.4 天达 95% 净值。衰减是这套平均的自带属性</td></tr>
+        <tr class="hl"><td><b>③ 健康净值</b></td><td><code>clamp(100 − 近期负担指数, 0, 100)</code> —— 因为它挂在会衰减的指数上，<b>戒烟后会回升</b></td></tr>
+      </tbody>
+    </table>
+    <table style="margin-top:16px;">
+      <thead><tr><th style="width:150px;">指标</th><th style="width:310px;">公式</th><th style="width:180px;">现值</th><th>出现处</th></tr></thead>
+      <tbody>
+        <tr><td>直接花费</td><td>Σ 每支单价 × 支数</td><td class="num">今日 ¥8.4</td><td>账本 · 取出弹层</td></tr>
+        <tr><td>健康折算</td><td><code>0.43 × 焦油 mg</code></td><td class="num">0.43 × 38 = ¥16.3</td><td>账本 · 取出弹层</td></tr>
+        <tr class="hl"><td><b>今日成本</b></td><td>直接花费 + 健康折算</td><td class="num">8.4 + 16.3 = <b>¥24.7</b></td><td>首页 · 账本</td></tr>
+        <tr><td>库存健康负债</td><td><code>0.43 × 库存焦油 mg</code></td><td class="num">0.43 × 121 = <b>−¥52.0</b></td><td>资产</td></tr>
+        <tr><td>库存支数</td><td>Σ 各品牌剩余支数</td><td class="num">12 + 5 = <b>17 支</b></td><td>资产（唯一出现处）</td></tr>
+        <tr><td>累计花费</td><td>已记录天数 × 当日直接花费</td><td class="num">7 × 8.4 = <b>¥58.8</b></td><td>我的</td></tr>
+        <tr><td>危害分</td><td>公式 ①</td><td class="num">4 支 / 38mg → <b>42</b></td><td>首页横幅 · 03 · 05 · 10 · 17 · 21</td></tr>
+        <tr><td>近期负担指数</td><td>公式 ②</td><td class="num"><b>42.3</b></td><td>首页</td></tr>
+        <tr><td>健康净值</td><td>公式 ③</td><td class="num">100 − 42.3 = <b>58%</b></td><td>首页 · 空状态 · 10 屏</td></tr>
+      </tbody>
+    </table>
+    <p class="gap" style="max-width:900px;">
+      <b>易错点：</b>今日成本 / 库存健康负债 / 累计花费是三个不同时间尺度，不能互相套用。曾经的 bug 是把资产页的健康负债做成了库存价值的镜像。
+    </p>
+    <p class="ok" style="max-width:900px;">
+      <b>五档阈值 20 / 40 / 60 / 80 → 轻负担 · 偏低 · 中等 · 偏高 · 重负担。</b>
+      判据只有一条：用户正好达到自设目标（默认 5 支）时必须落在「中等」中部 —— 实测 5 支 = 48.6 分，离上下边界各留 8 分余量。刻意不用「高危 / 严重」这类医学判词。
+    </p>
+  </div>
+
+  <!-- ============ 交互规则 ============ -->
+  <div class="sec">
+    <h2>三、交互规则 <em>RULES</em></h2>
+    <table>
+      <thead><tr><th style="width:250px;">情形</th><th style="width:190px;">是否打断</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>08 取出弹层</td><td><b>每次都出现</b></td><td>它是「确认 + 认知」，不是警示，不受频次约束</td></tr>
+        <tr><td>事后 03 常规警示</td><td>当日首次超目标 1–2 支，弹一次</td><td rowspan="2">触发基准是<b>用户自设目标</b>，不是分数分段 —— 分数分段会让基数落进高危区，第 2 支就弹窗，几天内必然脱敏</td></tr>
+        <tr><td>事后 17 重负担警示</td><td>当日首次超目标 ≥3 支，弹一次，<b>取代</b> 03</td></tr>
+        <tr><td>未超目标</td><td>完全不打扰</td><td>只走 08</td></tr>
+        <tr class="hl"><td>系统通知</td><td><b>取出后不推</b></td><td>只用于 21:30 复盘与跨天阈值。刚点完确认人还在 App 里，再叠一条通知是把同一件事说两遍</td></tr>
+      </tbody>
+    </table>
+    <table style="margin-top:16px;">
+      <thead><tr><th style="width:230px;">规则</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td><b>Tab Bar 三级状态</b></td><td>① 激活项 = 实心品牌绿 + 白内容（全栏唯一实色形）② 特殊动作项（取出）= 透明底 + 品牌绿内容 ③ 普通项 = 透明底 + 中性灰内容</td></tr>
+        <tr><td><b>浮层优先级</b></td><td>临时反馈（22 / 23）&gt; 常驻提示（18）。两者同处页头下方，不同时出现。临时反馈必须<b>绝对定位</b>，参与布局会让整页跳动</td></tr>
+        <tr><td><b>危害横幅极性</b></td><td>危害分 &gt; 0 → 琥珀态；危害分 = 0 → <b>浅绿正向态</b>。有代价才用「代价色」，否则是报假警</td></tr>
+        <tr><td><b>加载态边界</b></td><td>首页 / 资产 / 账本<b>不需要加载态</b>（数据全部本地计算）。真正需要的只有三处：<b>登录验证码（01 的步骤 ②，不独立成屏）、跨设备同步（19）、导出账本（25）</b></td></tr>
+        <tr><td><b>失败文案顺序</b></td><td>先安抚（「数据完好，不会丢失记录」）再要求操作。19 与 25 共用这条</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 逐屏 ============ -->
+  <div class="sec">
+    <h2>四、逐屏设计稿 <em>27 屏</em></h2>
+    <p class="lead">每屏给出：结构（自上而下）· 关键文案 · 状态与数值 · 本轮改动。<b>全部 27 屏的设计侧均已收口</b>，标 <span class="tagx">已定稿</span> 的为本轮落实过修改或确认无需改动的屏。</p>
+
+    <!-- 01 -->
+    <article class="sc flag" id="s01">
+      <header><span class="no">01</span><h3>账户与同步</h3><span class="role">登录 / 首次启动</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">登录只用于跨设备同步；跳过也完全可用。这是首次启动的一级页，<b>不可返回</b>。<b>本屏是两步一屏</b>——① 手机号 → ② 验证码，在同一个屏内推进，不换屏。<b>本屏共五态</b>（原型可逐态切换）。</p>
+      <div class="cols">
+        <div><h5>结构 · 步骤 ① 手机号</h5><ul>
+          <li>状态栏 62</li>
+          <li>页头 40：<b>无返回箭头</b>，仅居中品牌名「戒烟有数」14px</li>
+          <li>品牌标识 84 圆角方块（居中，新 logo）</li>
+          <li>标题「让记录跟着你走」22px + 说明 13px</li>
+          <li>手机号输入（+86 ｜ 手机号）</li>
+          <li>主按钮「手机号登录」<code>56 / r16</code> 实心绿</li>
+          <li>文字链「暂不登录，继续本地使用」</li>
+          <li>底部说明块 <b>两行文字</b>（无卡、无图标、无描边）</li>
+        </ul></div>
+        <div><h5>结构 · 步骤 ② 验证码</h5><ul>
+          <li>页头 40 留白 · <b>无返回箭头</b>（见下方「为什么两步合成一屏」）</li>
+          <li>标题「输入验证码」22px</li>
+          <li>副标题「已发送至 138****8888 · <b>更换号码</b>」（点它退回步骤 ①）</li>
+          <li>6 个输入格 <code>50 × 58</code> · 圆角 14 · 间距 10.6</li>
+          <li>「重新发送 52s」13px</li>
+          <li>主按钮「确认」<code>56</code></li>
+          <li>小字「验证码 5 分钟内有效，仅用于确认身份」</li>
+          <li>底部「本机数据仅保存在当前设备」</li>
+        </ul></div>
+        <div><h5>状态与流转</h5><ul>
+          <li>步骤 ① 两态：<b>空号</b>（输入框仅占位符，主按钮<b>真 <code>disabled</code></b>）／ <b>已填</b>（显号码，主按钮转品牌绿可用）</li>
+          <li>禁用态样式：实底改为描边 —— <code>1px solid #E4E0D8</code> + 底 <code>#FBFAF7</code> + 文字 <code>#C6CFC9</code>。原样式无描边、底色近页面色，用户会读成「这里没有按钮」</li>
+          <li>点「手机号登录」→ <b>屏内推进到步骤 ②</b>（不换屏、不压返回栈）</li>
+          <li>步骤 ② 三态：<b>输入中</b>（4 位已填 + 第 5 格聚焦，光标 2×24 竖条）／ <b>已填满</b>（6 位全填，主按钮可用）／ <b>错误</b>（6 格描边转暖褐 <code>#B4553F</code> + 暖底提示条）</li>
+          <li>输入格描边：空 <code>#E4E0D8</code> 1px ／ 已填 <code>#38665F</code> 1.5px ／ 错误 <code>#B4553F</code> 1.5px</li>
+          <li>输入块<b>上部对齐</b>：真机键盘占下半屏，下半屏留白即键盘位</li>
+          <li>重发：可点时 <code>#38665F</code>，倒计时中 <code>#9AA39D</code>，60s 一轮</li>
+          <li>「更换号码」退回<b>已填态</b>（不是空号态）—— 用户是填了号才走到这步的，不该清掉刚填的号码</li>
+          <li>点「确认」→ <b>02 首页</b>（登录完成）</li>
+          <li>点文字链「暂不登录」→ <b>02 首页</b>（跳过登录）</li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>本轮改动（2026-10-03 · 两步合一屏）：</b><br>
+        ① <b>原 <code>01b 验证码</code> 的独立编号取消，降为本屏的步骤 ②</b>。屏数 <b>28 → 27</b>。<br>
+        ② <b>为什么两步合成一屏</b> —— 当初把验证码拆成独立一屏的四条理由，三条建立在「两套输入同屏」这个<b>不存在的场景</b>上：<br>
+        　·「6 格跳格与手机号输入抢焦点」：手机号在步骤 ①、6 格在步骤 ②，<b>两者从不同时在屏</b>；<br>
+        　·「60s 重发 + 连错 3 次放不下」：倒计时是一行 14px 文字，连错 3 次是<b>服务端规则</b>，界面只在错误条里提一句；<br>
+        　·「输入级错误与『手机号格式错』打架」：<b>说反了</b> —— 分两步后两类错误各在各的步骤里，合屏反而消除了打架；<br>
+        　第四条第「键盘占下半屏留白不够」，两步的布局要求本来就一致（都是输入块上部对齐、下方留白即键盘位），没有冲突。<br>
+        ③ <b>去掉步骤 ② 的返回箭头</b> —— 01 是「不可返回的一级页」（见 N3），给它挂一个带返回的下游页自相矛盾：箭头会把用户送回一个自称没有出口的页。回退改由副标题里的「<b>更换号码</b>」承担，那才是用户真正想做的事。<br>
+        ④ <b>主按钮文案统一为「手机号登录」</b>（原文档写作「手机号快捷登录」，原型写作「手机号登录」，两处本就不一致）。合屏后下一步还要输验证码，「快捷」反而误导，故统一取「手机号登录」。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">画布节点：<code>2:24</code>（页头 <code>2:26</code> 删返回箭头 + 改居中品牌名、标识 <code>2:29</code> 换新 logo、<code>可选账户</code> 待删、底部卡 <code>2:37</code> / <code>2:43</code> 降级为文字）；<b>步骤 ② 尚未录入画布</b> —— 画布恢复后须在 01 这一屏内补一组状态，不再新画一屏。</p>
+    </article>
+
+    <!-- 02 -->
+    <article class="sc" id="s02">
+      <header><span class="no">02</span><h3>首页</h3><span class="role">今日概览</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">全 App 的信息中枢，纵向已排满（内容 ≈841 / 可用 852）。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>状态栏 62 · 页头 48（品牌名 + 日期 ／ 模型 A1 胶囊）</li>
+          <li><b>Hero 卡</b> <code>r24 padding16 gap12</code>：标签行（近期负担指数 + 副标 + <b>档位胶囊</b>）→ 大数字 <code>56/58</code> → 轨道 <code>8</code> → Caption</li>
+          <li><b>肺卡</b>：实时渲染 + 注脚 → 肺插画 <code>134</code></li>
+          <li><b>危害横幅</b> <code>r18 padding13</code>：图标 34 圆角 11 + 标题 + 副文案</li>
+          <li><b>三指标</b> <code>78</code>：今日成本 / 健康净值 / 今日焦油</li>
+          <li><b>操作区</b> <code>54</code>：今日进度 <code>fill(233)</code> + 放回库存 <code>110</code></li>
+          <li>Tab Bar 95（中间「取出」）</li>
+        </ul></div>
+        <div><h5>关键文案</h5><ul>
+          <li>标签「近期负担指数 · 按最近两周的取出记录计算」</li>
+          <li>Caption「库存 17 支 · 今日取出 4 支 · 目标每日少于 5 支」</li>
+          <li>横幅「中等负担 · 当日危害 42」/「少量吸烟也不安全，别把「少抽」当成低风险。」</li>
+          <li>进度「今日 4 / 5 支」5 格（4 亮）</li>
+          <li>肺注脚「近两周每取出一支 · 肺色加深 1.9%」</li>
+        </ul></div>
+        <div><h5>数值 / 状态</h5><ul>
+          <li>近期负担指数 <b>42.3</b> · 档位「中等」 · 轨道 42.3%</li>
+          <li>档位胶囊：<b>鼠尾草系</b>（<code>#DFEBE5</code> 底 / <code>#38665F</code> 字）—— 未越线</li>
+          <li>今日成本 <b>¥24.7</b> · 健康净值 <b>58%</b> · 今日焦油 <b>38mg</b></li>
+          <li>今日取出 <b>4</b> 支 / 目标 5 支</li>
+          <li><b>本屏是四态的</b>（原型可逐态切换）：<br>
+            ① <b>取出前</b>（本屏主态）42.3 / ¥24.7 / 58% / 38mg / 库存 17 / 4·5 格<br>
+            ② <b>取出后</b>（原 <code>23 取出成功</code>的落点）<b>43.1</b> / <b>¥29.9</b> / <b>57%</b> / <b>46mg</b> / 库存 <b>16</b> / <b>5·5 格全亮</b> + 中性反馈条<br>
+            ③ <b>忍住</b>（原 <code>22 忍住反馈</code>的落点）数值与 ① <b>完全相同</b>（忍住不产生代价），仅内容调暗 55% + 正向反馈条<br>
+            ④ <b>今日 0 支</b>（原 <code>24 今日 0 支</code>）<b>37.2</b> / ¥0.0 / <b>63%</b> / 0mg / 库存 17 / 0 格</li>
+          <li>其它状态：<b>15 完全空</b></li>
+          <li><b>22 / 23 / 24 三屏是首页的副本</b>（同一套骨架的四态），不是独立页面 —— 见下方「副本单点化」</li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>本轮三处改动：</b>
+        ① <b>第三格「库存焦油 121mg」→「今日焦油 38mg」</b>。原值有两个问题：口径错位（一个讲"今天"的页面塞了"全部库存"的数）＋ 跨页重复（与 04 资产页的「焦油库存」是同一个数）。新值在账本拆分明细里已有出处，零新增计算。<br>
+        ② <b>操作区宽度</b>：今日进度 固定 144 → <code>fill</code>（实得 233），放回库存 <code>fill</code> → 固定 <b>110</b>。放回库存是低频纠错动作，不该比承载核心信息的进度卡还宽。<br>
+        ③ <b>档位胶囊改随档位走</b>：未越线（轻负担 / 偏低 / 中等）用鼠尾草系，越线（偏高 / 重负担）用暖琥珀。判准与干预分级同一个（用户自设目标）。本屏「中等」因此<b>从琥珀变鼠尾草色</b>。
+      </div>
+      <div class="ok">
+        <b>2026-10-03 修复 · 副本单点化（N1 类第 5 次）：</b><br>
+        <b>问题</b>：<code>22 / 23 / 24</code> 三屏各自手抄了一份首页副本，改主屏时副本没跟上。最要命的是 <code>08 取出弹层</code> 的「仍要取出一支」点下去，<b>首页数字停在原地不动</b> —— 用户在弹层里被告知「当日危害 42 → 49」，看到的却还是 42。<br>
+        <b>根因</b>：<code>23</code> 的数值虽然写对了（43.1 / ¥29.9 / 57% / 46mg），但它和 <code>02</code> 之间<b>没有任何连接</b>；<code>22</code> 更糟，hero 只有「中等」没有 cap、少了肺卡与横幅，是半份副本。<br>
+        <b>修法</b>：把首页抽成参数化函数 <code>homeScreen({n, tar, harm, burden, net, cost, stock, goal, band, toast})</code>，四态由同一套骨架产出；<code>22 / 23 / 24</code> 三屏直接引用对应那一态，<b>不再手抄</b>。<br>
+        <b>沉淀</b>：这是 N1「主屏改了、副本没跟上」第 5 次出现，因此不再只靠"记住要同步"，而是<b>从结构上消掉副本</b> —— 有副本的地方一律改为引用同一个产出函数。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>2:70</code>（Hero <code>2:83</code>、档位胶囊 <code>2:87</code>、肺卡 <code>2:94</code>、横幅 <code>2:112</code>、指标 <code>2:121</code>、第三格 <code>2:130</code>／值 <code>2:129</code>、操作区 <code>2:131</code>、进度卡 <code>3:1692</code>）</p>
+    </article>
+
+    <!-- 03 -->
+    <article class="sc" id="s03">
+      <header><span class="no">03</span><h3>危害警示（常规档）</h3><span class="role">事后干预 ①</span></header>
+      <p class="sub">当日首次超过自设目标 1–2 支时弹<b>一次</b>。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>首页副本 + 遮罩 <b>50%</b>（强打断）</li>
+          <li>底部弹层 · 圆角 28 · 拖拽条 → 图标 → 标题 → ✕ → 主按钮 → 文字链取消 <span style="color:var(--amber)">（2026-10-08 对齐终态：原记「居中对话框」为画布早期形态，A2 修正后实现定稿为底部弹层，此处随实现）</span></li>
+          <li>图标 60 圆角 17（琥珀）／ 标题 19px ／ 说明 13.5px</li>
+          <li>双格数据卡 <code>64</code>（今日危害 ／ 今日已取出）</li>
+          <li>主按钮 <code>50</code>「今天不再取出」+ 文字链「我知道了」</li>
+        </ul></div>
+        <div><h5>文案</h5><ul>
+          <li>标题「健康警示」</li>
+          <li>说明「今天已取出 4 支。当日危害 42 分，属中等负担区间 —— 少量吸烟同样会推高心血管与呼吸道风险。」</li>
+        </ul></div>
+        <div><h5>数值 / 状态</h5><ul>
+          <li>今日危害 <b>42</b>（琥珀）／ 今日已取出 <b>4 支</b></li>
+          <li>触发：首次跨过目标 +1～2 支；<b>同日不重复</b></li>
+          <li>背景首页数字需与弹层一致（危害 42）</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>2:163</code>（对话框 <code>2:257</code>、危害值 <code>2:268</code>、说明 <code>2:265</code>、横幅 <code>2:206</code>）</p>
+    </article>
+
+    <!-- 04 -->
+    <article class="sc" id="s04">
+      <header><span class="no">04</span><h3>资产</h3><span class="role">库存与代价</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">一屏只「说一遍库存」：总览卡给支数与健康负债，指标排给含量口径，列表给品牌拆分。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>页头 48：标题「库存总览」+ 副标「按每日少于 5 支对齐」+ <b>+ 添加</b>胶囊</li>
+          <li><b>总览卡</b> <code>128 r24</code>：<b>白底 + 描边 <code>#E4E0D8</code></b> → 眉标「库存折算 + 日期」→ 双格（库存支数 ／ 健康负债）</li>
+          <li><b>指标排</b> <code>78 × 2</code>：焦油库存 ／ 尼古丁库存</li>
+          <li>「持有资产 · 2 项」+ 列表项 <code>74</code>（焦油 chip + 名称 + 库存/持有天数 + 默认胶囊）<b>+ 行尾 chevron</b></li>
+          <li>Hint 卡 + 「清空库存」描边按钮</li>
+          <li>Tab Bar（激活 = 资产）</li>
+        </ul></div>
+        <div><h5>数值</h5><ul>
+          <li>库存支数 <b>17 支</b>（12 + 5）</li>
+          <li>健康负债 <b>−¥52.0</b> = <code>0.43 × 121</code>，<b>琥珀文字</b></li>
+          <li>焦油库存 <b>121mg</b> · 尼古丁 <b>12.1mg</b></li>
+          <li>列表：云烟 细支 8mg · 库存 12 支 · 持有 6 天（默认）／ 中南海 低焦 5mg · 库存 5 支</li>
+        </ul></div>
+        <div><h5>去向</h5><ul>
+          <li><b>+ 添加</b> → 11 屏</li>
+          <li>清空库存 → 14 屏</li>
+          <li><b>列表项整行可点 → 27 屏 品牌详情</b>（本轮补）</li>
+          <li><b>列表项左滑</b> → 直接露出「删除」（不弹二次确认；品牌删除可撤销，破坏性低于清空库存）</li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>总览卡已定稿为白底描边</b>（原为实心品牌绿）。三条理由：① 实心绿在全 App 独占「推荐选项」这一语义，这块卡不是可点的推荐项，是全 App 唯一的破例 ② 与 05 账本同位置（屏首总览卡）语言一致 ③ 「健康负债 −¥52.0」在实心绿上只能用白字，改白底后用<b>琥珀</b>写 —— 代价色本来就是这个数的正确语义，反而更醒目。<br>
+        <b>代价：</b>资产页首屏少了一层明暗节奏。用「指标排的浅绿底 + Hint 卡」补回层次，不再靠大色块撑。
+      </div>
+      <div class="ok">
+        <b>N7 已定稿：列表项可点。</b>此前列表项不可点，意味着<b>单个品牌无法编辑或删除</b>，只能整批清空 —— 用户买错一个品牌、或换烟，除了清空全部没有别的出路。这让"记错了随时改"这条产品原则在资产页断了。
+        修法：整行可点进 <b>27 品牌详情</b>（改品牌 / 焦油 / 尼古丁 / 库存 / 每包支数 / 包装价），左滑直达删除。行尾加 chevron 表明可点。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>2:279</code>（总览卡 <code>2:290</code> 改白底描边、支数 <code>2:298</code>、负债 <code>2:302</code> 改琥珀文字、列表 <code>2:316</code> 加 chevron + 可点）</p>
+    </article>
+
+    <!-- 05 -->
+    <article class="sc" id="s05">
+      <header><span class="no">05</span><h3>账本</h3><span class="role">当日明细</span></header>
+      <p class="sub">首页给数字，账本给数字的出处。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>页头 48：账本 + 「把每支烟换算成钱、焦油和健康成本」</li>
+          <li><b>今日成本卡</b>：标签 + 日期胶囊 → 大数字 <code>38/42</code> + 单位 → 拆分明细条 <code>40</code>（直接花费 ／ 健康折算 ／ 焦油摄入）</li>
+          <li><b>危害卡</b>（琥珀）：危害分 <code>30</code> + 档位 ／ 标题 + 副文案</li>
+          <li>「本周取出 · 共 26 支 · 06/03 起」+ 柱状图 <code>66</code></li>
+          <li>「今日流转 · 查看全部 4 条」+ 3 条记录项 <code>44</code></li>
+          <li>Tab Bar（激活 = 账本）</li>
+        </ul></div>
+        <div><h5>关键文案</h5><ul>
+          <li>标签「今日成本」+ 数字后「· 截至现在」（<b>不要再用「/ 天」</b>，那是速率语义）</li>
+          <li>拆分：直接花费 ¥8.4 ／ 健康折算 ¥16.3 ／ 焦油摄入 38mg</li>
+          <li>危害卡：「当日危害警示分」</li>
+        </ul></div>
+        <div><h5>数值</h5><ul>
+          <li>今日成本 <b>¥24.7</b> · 危害分 <b>42</b> · 档位「中等」</li>
+          <li>本周取出共 26 支（柱状图 7 根，今日柱用<b>墨色</b>不用绿）</li>
+          <li>记录项：南京 雨花石 ／ 云烟 细支 ／ 利群 西子</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>2:363</code>（成本卡 <code>2:370</code>、标签 <code>2:372</code>、单位 <code>2:377</code>、危害卡 <code>2:390</code>、记录项 <code>2:417</code>）</p>
+    </article>
+
+    <!-- 06 -->
+    <article class="sc" id="s06">
+      <header><span class="no">06</span><h3>我的</h3><span class="role">个人档案</span></header>
+      <p class="sub">档案页，不是第二个首页 —— 指标用档案型数据，不复读首页的北极星。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>页头 48：「我的」+「档案 · 目标 · 偏好」+ 齿轮按钮 40（→ 07）</li>
+          <li><b>档案卡</b> <code>132 r24</code>：头像 + 本地戒烟档案 + 「数据仅保存在当前设备」+「仅本机」胶囊 + Hint</li>
+          <li><b>三指标</b> <code>92</code>：已记录天数 ／ 本周少抽 ／ 累计花费</li>
+          <li>「档案」+ 分组（戒烟目标 ／ 危害模型与证据 ／ 帮助与关于）</li>
+          <li>隐私说明</li>
+          <li>Tab Bar（激活 = 我的）</li>
+        </ul></div>
+        <div><h5>关键文案</h5><ul>
+          <li>Hint「已记录 7 天 · 库存 17 支 · 目标每日少于 5 支」</li>
+          <li>隐私说明「隐私优先 —— 今日成本、健康负债与危害模型都在本机计算，不上传吸烟记录。」</li>
+        </ul></div>
+        <div><h5>数值 / 去向</h5><ul>
+          <li>已记录 <b>7 天</b> · 本周少抽 <b>9 支</b> · 累计花费 <b>¥58.8</b>（琥珀）</li>
+          <li>戒烟目标 → 09 · 危害模型与证据 → 10 · 帮助与关于 → 13</li>
+          <li>齿轮 → 07 设置</li>
+        </ul></div>
+      </div>
+      <p class="ok">
+        <b>为什么第三格是「累计花费」而不是「健康净值」：</b>健康净值已经在首页承载，在"我的"再抄一遍没有新增信息；而且它与「今日成本」「库存健康负债」构成三个不同时间尺度，口径上与既有体系一致。
+      </p>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>2:454</code>（档案卡 <code>2:461</code>、三指标 <code>2:473</code>、花费值 <code>2:481</code>、分组 <code>2:486</code>）</p>
+    </article>
+
+    <!-- 07 -->
+    <article class="sc" id="s07">
+      <header><span class="no">07</span><h3>设置</h3><span class="role">干预与数据</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">两组：提醒与干预 3 项、数据与隐私 3 项，结尾一条隐私说明。<b>没有页脚</b>。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>导航头 56：返回 + 「设置」</li>
+          <li>组一 <b>提醒与干预</b>：严厉危害警示（副标 + 开关）／ 取烟震动反馈（开关）／ 每日复盘提醒（开关）</li>
+          <li>组二 <b>数据与隐私</b>：跨设备同步 ／ 导出戒烟账本 CSV ／ 本地数据 17 条记录</li>
+          <li>隐私说明卡</li>
+        </ul></div>
+        <div><h5>状态与去向</h5><ul>
+          <li>严厉危害警示开关 → 对应 03 / 17 的触发</li>
+          <li>每日复盘提醒开关 → <b>开</b>，行尾可进 <b>12 屏</b>改时间</li>
+          <li>跨设备同步 → 19 屏（失败时显示「同步失败」暖褐）</li>
+          <li>导出戒烟账本 → <b>25 屏</b></li>
+        </ul></div>
+        <div><h5>本轮已定</h5><ul>
+          <li>严厉危害警示副标 <code>2:575</code> → 「当日首次超过目标时弹出一次，同一天不重复」（原文案「取出后立即弹出健康警示，不可跳过」与干预分级规则直接冲突）</li>
+          <li>每日复盘提醒开关 <code>2:586</code> → <b>开</b>（12 屏已设 21:30，原本关着自相矛盾）</li>
+          <li>删除页脚 <code>2:626</code>「戒烟有数 · 原型版 0.1 · 本地数据 17 条」</li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>N1 副本遗漏提示：</b>同一个页脚在 <b>19 屏（可见）</b> 与 <b>12 屏（被弹层遮住）</b> 的副本里还在 —— 上一轮只删了主屏。两处都必须删，否则一页有一页没有。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>2:560</code>（副标 <code>2:575</code>、提醒开关 <code>2:586</code>、页脚 <code>2:626</code> ／ 副本 <code>3:1288</code> <code>3:1297</code>）</p>
+    </article>
+
+    <!-- 08 -->
+    <article class="sc" id="s08">
+      <header><span class="no">08</span><h3>取出弹层</h3><span class="role">事前确认</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">把「取出」从执行动作重构成「欲望来临时的一次干预」。<b>每次都出现</b>。</p>
+      <div class="cols">
+        <div><h5>结构（自上而下）</h5><ul>
+          <li>遮罩 <b>42%</b> + 底部弹层 <code>h560 r28</code></li>
+          <li>拖拽条 → 标题「想抽一支？」+ ✕</li>
+          <li>副标题「先看一眼代价，再决定。」</li>
+          <li>品牌单选 <code>60</code>（选中：绿描边 1.5px + 勾）—— <b>真可选</b>，点哪支承诺行与落点 <code>23</code> 一起变（见下方「选烟联动」）</li>
+          <li>正向激励文案</li>
+          <li><b>主 CTA（实心绿 + 勾）</b></li>
+          <li><b>成本警示卡（琥珀）</b> —— 紧贴负向按钮，给它「充电」</li>
+          <li><b>负向按钮（白底描边 + 暖褐）</b></li>
+          <li><b>无备注字段</b>（见下方决策）</li>
+        </ul></div>
+        <div><h5>文案</h5><ul>
+          <li>品牌：云烟 细支 8mg · <b>本品牌</b>库存 12 支 · 每支 ¥1.75 ／ 中南海 低焦 5mg · <b>本品牌</b>库存 5 支 · 每支 ¥1.00</li>
+          <li>激励「先不抽 —— 今天最划算的一笔。」</li>
+          <li>主 CTA「好，今天先不抽」</li>
+          <li>成本「取出「<b>所选烟</b>」后：当日危害 42 → <b>X</b>」+「健康折算 +¥<b>Y</b> · 焦油 +<b>Z</b>mg」<br>
+              <span class="num">云烟细支 → 49 ／ +¥3.44 ／ +8mg　·　中南海低焦 → 48 ／ +¥2.15 ／ +5mg</span></li>
+          <li>负向「仍要取出一支」</li>
+        </ul></div>
+        <div><h5>去向</h5><ul>
+          <li>主 CTA → <b>22 忍住反馈</b>（临时反馈条）</li>
+          <li>负向 → <b>23 取出成功</b>；触发 03 / 17 由干预分级决定</li>
+          <li>关闭 → 回首页</li>
+        </ul></div>
+      </div>
+      <div style="margin:14px 0 0;font-size:12.5px;color:#8A4A1C;background:#FBF0E8;border-radius:12px;padding:11px 14px;line-height:1.75;">
+        <b>2026-10-03 晚补：两支烟改为真可选（K 类）。</b>
+        原先两行烟看着能选（第一行 1.5px 绿描边 + 勾），实际<b>都没有点击处理</b> —— 选中态是写死的静态样式。
+        用户改选 5mg 那支，弹层仍按 8mg 承诺、落点 <code>23</code> 也仍按 8mg 记账：
+        <b>「用户点了一支烟，产品按另一支记账」</b>。这与 <code>22/23/24</code> 手抄首页是同一个 N1 形态，只是副本的位置换到了「取出一支烟」的数值推导里。<br>
+        现「取出一支烟」的全部推导收敛到 <code>afterTake(cigId)</code> 一个函数，
+        本屏承诺行 · <code>23</code> 落点 · <code>02</code> 态② · <code>22</code> 忍住文案全部由它产出。
+        两支烟的落点对照：<br>
+        <span class="num">云烟细支 8mg：危害 49 · 焦油 46mg · 成本 ¥29.9 · 负担 43.1　／　中南海低焦 5mg：危害 48 · 焦油 43mg · 成本 ¥27.9 · 负担 43.0</span><br>
+        <b>库存两级要分清</b>：本屏的「<b>本品牌</b>库存 N 支」是单品库存，首页 / <code>23</code> 的「库存 16/17 支」是全部合计 —— 故本屏加了「本品牌」限定词。
+        规格详见 <code>design-spec.md</code> §8.2b。
+      </div>
+      <div class="ok">
+        <b>N4 已定稿：不加备注字段。</b>Flutter 的 <code>docs/latest_prototype_sync_checklist.md</code> 要求「取烟 Sheet 中备注常驻显示，备注不是必填」，本轮明确<b>不采纳</b>，三条理由：
+        ① 这一屏的目的是<b>劝阻</b>，任何需要用户输入的字段都会增加停留时长与决策负担，削弱"看一眼代价再决定"的瞬时性；
+        ② 备注在取出场景里几乎必然空着（人在烟瘾上来的那一刻不会写字），加一个恒空的字段只会让弹层多 72px、稀释主 CTA；
+        ③ <b>补录路径已存在</b> —— `21 记录明细` 支持改品牌与时间，备注归入那里更自然。
+        <br><b>给两端的答复：</b>请把 sync checklist 里这条改为「不实现」，或将其移入 `21 记录明细` 的字段定义。若产品仍坚持常驻，需重新评估弹层高度 <code>560 → 632</code> 与首屏是否溢出。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>2:648</code>（弹层 <code>2:746</code>、品牌项 <code>2:756</code>/<code>2:765</code>、主 CTA <code>2:780</code>、成本卡 <code>2:778</code>、负向 <code>2:782</code>）</p>
+    </article>
+
+    <!-- 09 -->
+    <article class="sc" id="s09">
+      <header><span class="no">09</span><h3>调整戒烟目标</h3><span class="role">目标设定</span></header>
+      <p class="sub">目标决定危害分与健康净值的算法，也是干预分级的触发基准。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>「我的」副本 + 遮罩 42% + 弹层 <code>y330 h570</code></li>
+          <li>拖拽条 → 「调整戒烟目标」+ ✕ → 副标题</li>
+          <li>步进卡：每日上限 ／ 范围 1–20 支 ／ <code>[−] 5 支/天 [+]</code>（46 圆）／ <b>20 格刻度条</b>（前 5 格亮）</li>
+          <li>预设胶囊：3 支 ／ 5 支·默认（选中）／ 8 支</li>
+          <li>收益提示（浅绿）</li>
+          <li>「保存目标」实心绿 + 「取消」文字链</li>
+        </ul></div>
+        <div><h5>关键文案</h5><ul>
+          <li>副标题「目标决定危害分与健康净值的算法。」</li>
+          <li>收益「每减少 1 支，日均健康负债约降 <b>¥3.9</b>。」（原 ¥2.8，按新曲线重算）</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>刻度条 20 格对应上限 1–20 支，亮格数 = 当前值</li>
+          <li>预设 5 支 = 默认目标</li>
+          <li>「取消」用文字链、不用描边按钮 —— 纯取消不给按钮权重</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:2</code>（弹层 <code>3:114</code>、步进 <code>3:123</code>、刻度 <code>3:137</code>、收益 <code>3:170</code>）</p>
+    </article>
+
+    <!-- 10 -->
+    <article class="sc" id="s10">
+      <header><span class="no">10</span><h3>危害模型与健康净值</h3><span class="role">可追溯性</span></header>
+      <p class="sub">「数字可追溯」这件事被看见的地方。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>导航头 52：返回 + 「危害模型」+ A1</li>
+          <li>标题块「危害分与健康净值」+ A1 胶囊 + 副标题</li>
+          <li><b>公式卡</b>：核心公式 13px + 焦油修正 11px</li>
+          <li><b>变量卡</b>：4 行 <code>46</code>（今日取支数 ／ 今日焦油 ／ 健康折算单价 ／ 近期负担指数）</li>
+          <li><b>结果卡</b>：42 + 档位胶囊 + 5 段等级条 + 说明</li>
+          <li><b>净值卡</b>：公式 + 换算 + <b>「会回升」提示</b></li>
+          <li>页脚（WHO 依据 + 免责 + 版本）</li>
+        </ul></div>
+        <div><h5>文案</h5><ul>
+          <li>公式 ①「危害分 = 100 × (1 − 0.5^(支数 ÷ 5.2)) + 焦油修正」</li>
+          <li>修正「焦油修正 = clamp((今日焦油 mg − 支数 × 9) × 0.5, −5, +10)」</li>
+          <li>净值「健康净值 = clamp(100 − 近期负担指数, 0, 100)」</li>
+          <li>新增一句「<b>戒烟后负担会按无取出天数逐步回落，约 23 天回到 95%。</b>」</li>
+          <li>等级「由轻到重：轻负担 · 偏低 · 中等 · 偏高 · 重负担」</li>
+        </ul></div>
+        <div><h5>数值</h5><ul>
+          <li>今日取支数 4 支 ／ 今日焦油 38mg ／ 健康折算单价 ¥0.43</li>
+          <li>近期负担指数 <b>42.3</b>（指数加权平均 · 半衰期 5.4 天）</li>
+          <li>结果 <b>42 · 中等</b>，5 段条高亮第 3 段</li>
+          <li>净值换算 100 − 42.3 = 57.7 → <b>58%</b></li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>本轮改动：</b>公式卡换成两条新公式；变量卡补「近期负担指数」行（行高 58 → 46）；<b>删掉独立的「依据」卡</b>把 WHO 依据与免责并入页脚，腾出空间给净值卡。
+        屏内落底 838 / 852，不溢出。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:180</code>（公式卡 <code>3:196</code>、变量卡 <code>3:200</code>、结果卡 <code>3:221</code>、净值卡 <code>3:1710</code>）</p>
+    </article>
+
+    <!-- 11 -->
+    <article class="sc" id="s11">
+      <header><span class="no">11</span><h3>添加香烟资产</h3><span class="role">库存录入</span></header>
+      <p class="sub">阻断级：没有「每包支数」就算不出单支价格，而账本按单支计费。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>资产副本 + 遮罩 42% + 弹层 <code>y240 h640</code></li>
+          <li>拖拽条 → 「添加香烟资产」+ ✕ → 副标题</li>
+          <li>品牌（整行）</li>
+          <li>焦油含量 ｜ 尼古丁（2 列）</li>
+          <li>购入数量（<b>包</b>）｜ 包装价（¥/包）</li>
+          <li><b>每包支数 ｜ 单支价格（只读）</b></li>
+          <li>录入预览（浅绿）</li>
+          <li>「保存到库存」实心绿 + 「取消」文字链</li>
+        </ul></div>
+        <div><h5>文案</h5><ul>
+          <li>副标题「焦油与尼古丁会写入库存折算，填准一点更好用。」</li>
+          <li>示例：南京 低焦 ／ 6mg ／ 0.6mg ／ 2 包 ／ ¥24 / 包 ／ 20 支/包 ／ <b>¥1.20 只读</b></li>
+          <li>预览「录入后库存变为 57 支、焦油 361 mg；本次入库 40 支，账面价值 ¥48.0。」</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li><code>单支价格 = 包装价 ÷ 每包支数</code> = 24 ÷ 20 = ¥1.20</li>
+          <li>「数量」语义是<b>包</b>，不是支（买烟本来就按包）</li>
+          <li>单支价格只读，由前两项推导</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:242</code>（弹层 <code>3:332</code>、数量 <code>3:357</code>、新行 <code>3:1714</code>、预览 <code>3:372</code>）</p>
+    </article>
+
+    <!-- 12 -->
+    <article class="sc" id="s12">
+      <header><span class="no">12</span><h3>每日复盘提醒</h3><span class="role">时间设定</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">通知在 App 内唯一的用途：21:30 复盘。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>设置副本 + 遮罩 42% + 弹层 <code>y360 h545</code></li>
+          <li>拖拽条 → 「每日复盘提醒」+ ✕ → 副标题</li>
+          <li>大号时间 <code>21:30</code>（44px Inter Bold）+「每天 · 仅推一次」</li>
+          <li><b>16 格刻度条</b>代表 19:00–23:00（每格 15 分钟，前 10 格亮 = 21:30）</li>
+          <li>预设：20:30 ／ 21:30（默认）／ 22:30</li>
+          <li>「保存提醒时间」实心绿 + 「取消」文字链</li>
+        </ul></div>
+        <div><h5>关键文案</h5><ul>
+          <li>副标题「到点提醒你回看当天的危害与花费，只推一次。」</li>
+          <li>提示「选一个你通常还醒着、但当天已不再抽的时间。」</li>
+        </ul></div>
+        <div><h5>副本同步（N1）</h5><ul>
+          <li><b>背景（设置副本）的页脚「戒烟有数 · 原型版 0.1 · 本地数据 17 条」必须删除</b> —— 虽被弹层遮住，但屏与屏之间不一致会直接暴露</li>
+          <li>「严厉危害警示」副标同步为「当日首次超过目标时弹出一次，同一天不重复」</li>
+          <li>「每日复盘提醒」开关同步为<b>开</b></li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>N1 处置：</b>页脚在 <b>19 屏是可见的</b>、在 12 屏被遮住 —— 两处都要删。这是同类问题第 4 次出现（主屏改了、副本没跟上），因此本轮在所有涉及 07 设置的屏（12 / 19）上都写明了节点，不再只在主屏验证。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:378</code>（弹层 <code>3:446</code>、预设 <code>3:482</code>；副标 <code>3:391</code>、开关 <code>3:395</code>、<b>页脚待删</b>）</p>
+    </article>
+
+    <!-- 13 -->
+    <article class="sc" id="s13">
+      <header><span class="no">13</span><h3>帮助与关于</h3><span class="role">关于</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">从"一张卡"重构为"一组入口"。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>「我的」副本 + 遮罩 42% + 弹层 <code>y420 h430</code></li>
+          <li>拖拽条 → 「关于」+ ✕</li>
+          <li>App 标识 48 <code>r14</code>（居中）+「戒烟有数」+「版本 0.1 · 模型 A1」</li>
+          <li><b>检查更新</b>卡（浅绿）：已是最新版本 ›</li>
+          <li>链接组 <b>3 行</b>：危害模型与证据 <code>A1</code> › ／ <b>隐私政策与用户协议</b> › ／ 反馈与建议 ›</li>
+          <li>免责说明</li>
+          <li><b>没有「关闭」按钮</b>（✕ + 拖拽已足够）</li>
+        </ul></div>
+        <div><h5>去向</h5><ul>
+          <li>危害模型与证据 → 10 屏</li>
+          <li>隐私政策与用户协议 → <b>26 屏</b></li>
+          <li>反馈与建议 → 调起系统邮件（预填版本 + 机型）</li>
+        </ul></div>
+        <div><h5>本轮已定</h5><ul>
+          <li><b>App 标识 <code>3:1364</code> 换新 logo</b> —— 原为早期占位的「绿方块 + 白云」，语义错了（云 = 同步，而产品核心隐喻是账本与代价）。新稿：<code>#4E8479 → #23443D</code> 渐变方块 + 奶油刻度柱 + 浅琥珀燃点</li>
+          <li>删除「关闭」按钮 <code>3:1399</code>（✕ + 拖拽条已足够表达可关）</li>
+          <li>链接 4 行 → 3 行（隐私政策 / 用户协议合并，性质相同且原为死链）</li>
+          <li>弹层高 <code>640 → 430</code></li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>为什么这屏迭代最多：</b>从居中弹窗改成底部弹层、删关闭按钮、合并链接行、换标识，四处叠加。改完后弹层从 640 收到 430，也是全 App 唯一一处"内容比容器小很多"的弹层 —— 这是对的，工具型弹层不该撑满。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:497</code>（弹层 <code>3:1355</code>、标识 <code>3:1364</code> 换 logo、更新卡 <code>3:1369</code>、链接 <code>3:1377</code>、关闭 <code>3:1399</code> 待删）</p>
+    </article>
+
+    <!-- 14 -->
+    <article class="sc" id="s14">
+      <header><span class="no">14</span><h3>清空库存确认</h3><span class="role">破坏性二次确认</span></header>
+      <p class="sub">破坏性操作里，<b>安全选项才是主按钮</b>。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>资产副本 + 遮罩 <b>50%</b> + 底部弹层 <span style="color:var(--amber)">（2026-10-08 对齐终态，同 03：原「居中对话框」为画布早期形态）</span></li>
+          <li>图标 60 <code>r17</code>（琥珀，垃圾桶）→ 标题「清空库存？」</li>
+          <li>说明「将删除全部持有资产与库存记录，此操作不可撤销。」</li>
+          <li><b>损耗量化卡</b>：17 支 将删除库存 ｜ ¥26.0 库存价值</li>
+          <li>「保留库存」<b>实心绿</b> ／ 「确认清空」描边 + 暖褐</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>绿色给"不做那件事"—— 破坏性场景里安全选项才是主按钮，与 03、08、21 同一条原则</li>
+          <li>量化损耗：不只说"不可撤销"，还要说清<b>会失去什么</b></li>
+        </ul></div>
+        <div><h5>数量口径</h5><ul>
+          <li>支数与账面价值是<b>动态值</b>（当前 17 支 / ¥26.0）</li>
+          <li>"库存价值"只在这里出现，是「会失去什么」的正确表述（与 04 屏的"健康负债"回答的是不同问题）</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:639</code>（对话框 <code>3:728</code>）</p>
+    </article>
+
+    <!-- 15 -->
+    <article class="sc" id="s15">
+      <header><span class="no">15</span><h3>首页 · 空状态</h3><span class="role">首次启动</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">不做插画式空状态 —— 插画只说明「这里还没东西」，置灰的数字才能说明「你还差什么才能看到它」。</p>
+      <div class="cols">
+        <div><h5>保留首页骨架，逐块改待数据态</h5><ul>
+          <li>Hero：数字 → <code>--</code>（禁用色）、进度条清空、胶囊 →「待数据」、说明 →「还没有库存与取出记录」</li>
+          <li>肺卡：插画降 <b>35% 不透明度</b>、胶囊 →「待数据」、注脚 →「记满 3 天后开始渲染」、卡底追加引导语</li>
+          <li>横幅：整块转中性灰，文案 →「今日还没有取出记录 / 取出后这里会显示当日危害分与等级。」</li>
+          <li>三指标：数值全部 → <code>--</code>，第三格标签为<b>今日焦油</b></li>
+          <li>主操作：「取出」→ <b>添加库存</b>（加号图标）／「放回库存」→ <b>先设定戒烟目标</b>（准星图标）</li>
+          <li>Tab 中间「取出」<b>转灰禁用</b></li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>没有库存就无烟可取 —— 中间 Tab 禁用让空状态像"设计过"而不是"空的"</li>
+          <li>肺部负担色块<b>隐藏</b>（一支都没抽过，不该有负担）</li>
+          <li>引导语「先添加库存、记满 3 天，就能看到自己的负担曲线。」</li>
+          <li>档位胶囊此处为「待数据」中性态，<b>不受档位配色规则约束</b></li>
+        </ul></div>
+        <div><h5>本轮改动</h5><ul>
+          <li>Hero 大数字 <code>44/46 → 56/58</code>、轨道与 Caption 保持，与 02 首页同构</li>
+          <li>三指标第三格「库存焦油」→「<b>今日焦油</b>」（值仍为 <code>--</code>）</li>
+          <li>标签「肺部负担指数」→「近期负担指数」</li>
+        </ul></div>
+      </div>
+      <p class="ok"><b>余量已实测（改字号前先量过）：</b>Body 可用底边 = 852 − 95 = <b>757</b>；操作区底边原落 <b>733</b>（余 24px），字号改后落 <b>745</b>（仍余 <b>12px</b>）。<b>安全，不溢出。</b></p>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:752</code>（Hero <code>3:757</code>、大数字 <code>3:792</code> 字号 44→56、第三格标签 <code>3:776</code>、操作区 <code>3:761</code>）</p>
+    </article>
+
+    <!-- 16 -->
+    <article class="sc" id="s16">
+      <header><span class="no">16</span><h3>通知展开态</h3><span class="role">通知内容规格</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">只交付 App 可控的部分 —— 卡片形状、字体、堆叠都是系统决定的，设计它等于没设计。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>深色壁纸 + 日期 + 通知中心标题</li>
+          <li>通知卡：App 图标 + 名称 + 时间 <b>21:30</b> + 标题 + 正文</li>
+          <li><b>图片附件</b>：7 柱「本周取出」小图（今日柱墨色高亮）</li>
+          <li><b>操作按钮</b>：看今天的账本（浅绿，推荐）／ 明天再说（中性）</li>
+        </ul></div>
+        <div><h5>App 可控清单</h5><ul>
+          <li>应用图标、应用名、标题、正文、分组、操作按钮、图片附件、声音/角标/提醒级别</li>
+          <li><b>不可控</b>（系统决定）：卡片形状与圆角、毛玻璃、图标在左的排版、字体字号、时间位置、堆叠动画</li>
+        </ul></div>
+        <div><h5>N2 已改内容</h5><ul>
+          <li>时间 <code>21:42</code> → <b><code>21:30</code></b>（对齐 12 屏设定的复盘时间）</li>
+          <li>标题 → 「今天的账本出来了」</li>
+          <li>正文 → 「今日 5 支 · 危害 49 · 花费 ¥29.9。复看一遍，明天更容易。」</li>
+          <li>附件标题 → 「本周取出」保留，与复盘语境一致（它本就是周视图）</li>
+          <li>操作按钮：原「先不抽」在复盘语境下已无意义（当天已成事实），改为 <b>「看今天的账本」</b></li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>N2 处置：这是一处规格与规则打架。</b>原样例内容是「当日危害升至 71 / 已记下今天第 5 支」，即<b>取出后的即时通知</b>，而干预分级明确写着「系统通知：取出后不推 —— 只用于 21:30 复盘与跨天阈值」。规格屏和规则打架时，开发会照规格实现，规则就白定了。
+        <br><b>教训</b>：规格屏也要参与规则一致性检查。它容易被当成"示意图"放过。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:1014</code>（通知卡 <code>3:1016</code>、时间待改、标题 <code>3:1019</code>、正文 <code>3:1021</code>、附件 <code>3:1027</code>、按钮 <code>3:1036</code>/<code>3:1038</code>）</p>
+    </article>
+
+    <!-- 17 -->
+    <article class="sc" id="s17">
+      <header><span class="no">17</span><h3>重负担档警示</h3><span class="role">事后干预 ②</span></header>
+      <p class="sub">当日首次超过自设目标 ≥3 支时弹一次，<b>取代</b> 03，不叠加。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>首页副本 + 遮罩 50% + 底部弹层 <span style="color:var(--amber)">（2026-10-08 对齐终态，同 03：原「居中对话框」为画布早期形态）</span></li>
+          <li>图标 60（暖红 <code>#F7E3DA</code> / <code>#B4553F</code>）→ 标题 → 说明</li>
+          <li>双格数据卡（今日危害 ／ 今日已取出）</li>
+          <li><b>7 天危害预测卡</b>（琥珀）—— 03 讲现状，这里讲"照这样下去 7 天后会怎样"</li>
+          <li><b>替代动作提示</b>：想抽的时候先做 3 次深呼吸…</li>
+          <li>「今天到此为止」实心绿 + 「我知道了」文字链</li>
+        </ul></div>
+        <div><h5>数值</h5><ul>
+          <li>今日危害 <b>86</b> ／ 今日已取出 <b>13 支</b>（新公式下 11 支只有 79.7 分，够不到重负担，故支数上调）</li>
+          <li>预测「按这个量，7 天后负担指数 42.3 → <b>68.1</b>」（按 λ=0.12 复算：<code>0.88×42.3 + 0.12×86</code> 递推 7 天 = <code>68.14</code>。<span style="color:var(--amber)">原写 66.0，系误用 24 屏的起点 37.2，已订正</span>）</li>
+          <li>背景首页同步：库存 4 支 · 危害 86 · 进度 13/5 · 负担指数 47.5 · 净值 52% · 焦油 124mg · 成本 ¥76.1</li>
+        </ul></div>
+        <div><h5>与 03 的差异</h5><ul>
+          <li>色温更深（琥珀 → 暖红）</li>
+          <li><b>加了前向预测</b></li>
+          <li><b>给了替代动作</b>，而不只是警告</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:1043</code>（对话框 <code>3:1056</code>、双指标 <code>3:1158</code>/<code>3:1160</code>、预测 <code>3:1170</code>）</p>
+    </article>
+
+    <!-- 18 -->
+    <article class="sc" id="s18">
+      <header><span class="no">18</span><h3>通知权限兜底</h3><span class="role">降级态</span></header>
+      <p class="sub">让用户知道功能缺了一块，但不唠叨。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>首页副本；页头下方插入 <code>28</code> 高的常驻细条</li>
+          <li>细条：通知图标 + 「通知已关闭 · 取出后不再推送提醒 ›」整条可点</li>
+          <li>为塞下细条做了等比收缩：肺插画 134→104、Hero 上下内边距 14/6</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>刻意<b>不做弹窗、不做引导页</b> —— 常驻细条足够</li>
+          <li>整条可点 → 直达系统设置</li>
+          <li>与 22 / 23 的临时反馈条同处页头下方 → <b>优先级：临时反馈 &gt; 常驻提示</b>（不同时出现）</li>
+        </ul></div>
+        <div><h5>本轮改动</h5><ul>
+          <li>操作区换成「今日进度 <code>fill</code> + 放回库存 <code>110</code>」</li>
+          <li>Hero 标签 → 近期负担指数 · 胶囊 → 中等 · 横幅 → 中等负担 · 当日危害 42</li>
+          <li>三指标第三格 → 今日焦油</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:1173</code>（细条 <code>3:1271</code>、Hero <code>3:1178</code>、操作区 <code>3:1182</code>）</p>
+    </article>
+
+    <!-- 19 -->
+    <article class="sc" id="s19">
+      <header><span class="no">19</span><h3>同步失败态</h3><span class="role">错误态</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">先安抚，再要求操作。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>设置副本：组一 提醒与干预、组二 数据与隐私</li>
+          <li>「跨设备同步」行值改为 <b>同步失败</b>（暖褐）</li>
+          <li>数据与隐私组下插入 <code>40</code> 提示条：「上次同步失败，本机数据完好。不会丢失记录。」+ 行尾「重试」</li>
+          <li>隐私说明</li>
+          <li><b>无页脚</b>（与 07 一致）</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li><b>「不会丢失记录」必须写在「重试」前面</b> —— 同步失败时用户最怕的是数据没了</li>
+          <li>不做整屏错误页：设置页本身可用，只需要一条提示</li>
+        </ul></div>
+        <div><h5>N1 副本同步</h5><ul>
+          <li><b>删除页脚「戒烟有数 · 原型版 0.1 · 本地数据 17 条」</b> —— <b>本屏的页脚是可见的</b>，是本轮查出的实质遗漏（上一轮只删了主屏）</li>
+          <li>「严厉危害警示」副标同步为「当日首次超过目标时弹出一次，同一天不重复」</li>
+          <li>「每日复盘提醒」开关同步为<b>开</b></li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>本屏是 N1 的判定依据</b>：正因为 19 屏的页脚没被弹层遮住，才一眼看出主屏删了、副本没删。以后任何主屏改动都必须立刻列出所有带该屏副本的屏并逐一处理。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:1280</code>（提示条 <code>3:1347</code>、<b>页脚待删</b>、副标 <code>3:1293</code>、开关 <code>3:1297</code>）</p>
+    </article>
+
+    <!-- 20 -->
+    <article class="sc" id="s20">
+      <header><span class="no">20</span><h3>关于 · 有新版本</h3><span class="role">更新</span>
+        <span class="badges"><span class="tagx">已定稿</span></span></header>
+      <p class="sub">13 屏的状态变体，唯一差别在检查更新行。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>「我的」副本 + 遮罩 42% + 弹层（同 13，<code>h430</code>）</li>
+          <li>检查更新行为：<code>检查更新</code> ｜ <b>有新版本 v0.2</b>（暖琥珀）+ 行尾 <b>实心绿小胶囊「立即更新」</b>（替换原 chevron）</li>
+          <li>链接组 3 行、免责说明同 13</li>
+        </ul></div>
+        <div><h5>本轮已定</h5><ul>
+          <li>App 标识 <code>3:1453</code> 替换为新 logo（同 13）</li>
+          <li>删除「关闭」按钮 <code>3:1423</code></li>
+          <li>链接 4 行 → 3 行</li>
+          <li>弹层高 <code>640 → 430</code></li>
+        </ul></div>
+        <div><h5>未做</h5><ul>
+          <li>点「立即更新」之后的<b>更新说明（changelog）</b>页 —— 留了口子，未设计。原型阶段可接受：真实更新流程由应用市场承接</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:1402</code>（弹层 <code>3:1407</code>、标识 <code>3:1453</code> 换 logo、更新卡 <code>3:1420</code>、立即更新 <code>3:1564</code>、关闭 <code>3:1423</code> 待删）</p>
+    </article>
+
+    <!-- 21 -->
+    <article class="sc" id="s21">
+      <header><span class="no">21</span><h3>记录明细</h3><span class="role">可改可删</span></header>
+      <p class="sub">记账类产品的生死线：记错一次不能改，用户就会停止使用。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>账本副本 + 遮罩 42% + 弹层 <code>y370 h520</code></li>
+          <li>拖拽条 → 「记录明细」+ ✕ → 副标题</li>
+          <li>字段组 2 行 <code>52</code>：品牌 ｜ 取出时间</li>
+          <li>说明行「这一支：焦油 9mg · 花费 ¥2.65 · 当天危害 +7」</li>
+          <li>「保存修改」实心绿 ／ 「删除这条记录」白底 + 暖褐</li>
+          <li>底部说明「删除后当天危害分会重新计算，不会影响其它记录。」</li>
+        </ul></div>
+        <div><h5>关键文案</h5><ul>
+          <li>副标题「记错了随时改，改完当天的危害分会重新算。」—— <b>先说明"可以改"，再说明改了什么</b></li>
+          <li>字段值示例：南京 雨花石 ／ 08:42</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>删除是第二按钮（描边暖褐），保存是主按钮</li>
+          <li>删除后重算当天危害分 —— 要说清影响范围（"不影响其它记录"）</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:1567</code>（弹层 <code>3:1664</code>、字段 <code>3:1673</code>、保存 <code>3:1686</code>、删除 <code>3:1688</code>）</p>
+    </article>
+
+    <!-- 22 -->
+    <article class="sc" id="s22">
+      <header><span class="no">22</span><h3>忍住反馈</h3><span class="role">正反馈</span></header>
+      <p class="sub">这是全 App 唯一奖励「忍住」的地方 —— 戒烟的胜负手就在忍住那一下。<b>本屏 = <code>02 首页</code>的「③ 忍住」态</b>（同一份 HTML，不再手抄）。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li><b>02 首页的「③ 忍住」态</b>（共用同一套骨架）+ <b>绝对定位</b>的临时反馈条</li>
+          <li><b>数值与首页主态完全一致</b>（忍住不产生代价）：负担 42.3 · 成本 ¥24.7 · 净值 58% · 焦油 38mg · 库存 17 · 进度 4/5。原型已实测校验</li>
+          <li>反馈条 <code>x20 y118 w353 r14 padding 12/14</code></li>
+          <li>图标 22 圆 <code>#4E8B7E</code> + 白色勾</li>
+          <li>主文案 13px Medium <code>#38665F</code> ／ 副文案 11px <code>#4A6B60</code></li>
+        </ul></div>
+        <div><h5>文案</h5><ul>
+          <li>「今天第 3 次忍住」</li>
+          <li>「这一支没抽，少摄入焦油 8mg · 省下 ¥1.75」</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>底 <code>#F2F7F5</code>（正向极浅绿）</li>
+          <li>显示 2.6s</li>
+          <li><b>必须绝对定位</b>：① 首页纵向已排满 ② 临时反馈参与布局会让整页跳动</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">节点：<code>3:1735</code>（反馈条 <code>3:1842</code>）</p>
+    </article>
+
+    <!-- 23 -->
+    <article class="sc new" id="s23">
+      <header><span class="no">23</span><h3>取出成功</h3><span class="role">中性反馈</span>
+        <span class="badges"><span class="tagx">新增</span></span></header>
+      <p class="sub">与 22 构成一对镜像：忍住有回声，取出也有回声，只是语气不同。<b>本屏 = <code>02 首页</code>的「② 取出后」态</b>（同一份 HTML）。<br>
+        <b>⚠ 2026-10-03 修复</b>：此前本屏数值虽写对，但与 <code>02</code> 无任何连接 —— <code>08 弹层</code>点「仍要取出一支」后，首页数字停在 <code>42.3</code> 不动。现由 <code>08</code> 直接落进本态，数字跟着走。<br>
+        <b>⚠ 2026-10-03 晚二次修复（K 类）</b>：本屏的数值<b>取决于用户在 <code>08</code> 选了哪支烟</b> —— 原先是固定一组 8mg 的数。现由 <code>afterTake()</code> 单点产出，下面两组都是本屏的真实形态。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li><b>02 首页的「② 取出后」态</b>（共用同一套骨架）+ 同规格反馈条（几何与 22 <b>完全一致</b>）</li>
+          <li><code>x20 y118 w353 r14 padding 12/14</code> · 绝对定位</li>
+        </ul></div>
+        <div><h5>语气区分</h5><ul>
+          <li>22 忍住：底 <code>#F2F7F5</code> + 勾选图标 → <b>正向</b></li>
+          <li>23 取出：底 <code>#DFEBE5</code> + 取出脉冲图标 → <b>中性</b></li>
+          <li>文案「已记录 · 今日第 5 支」/「库存 16 支 · 焦油 +<b>所选烟的 mg</b>mg · 花费 +¥<b>所选烟的价</b>」</li>
+          <li>显示 <b>1.8s</b>（比 22 短 —— 它只是确认，不是激励）</li>
+        </ul></div>
+        <div><h5>屏上数值（随 <code>08</code> 选的那支烟变）</h5><ul>
+          <li><b>取云烟细支 8mg</b>：危害 42 → <b>49</b> · 焦油 38 → <b>46mg</b> · 成本 <b>¥29.9</b> = (8.4+1.75) + 0.43×46 · 负担 <b>43.1</b> · 净值 <b>57%</b></li>
+          <li><b>取中南海低焦 5mg</b>：危害 42 → <b>48</b> · 焦油 38 → <b>43mg</b> · 成本 <b>¥27.9</b> = (8.4+1.00) + 0.43×43 · 负担 <b>43.0</b> · 净值 <b>57%</b></li>
+          <li>两种情形：库存均 <b>16 支</b> · 进度均 <b>5/5</b></li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">规格见 <code>design-spec.md</code> §8.2 / §8.2b；画布尚未录入。</p>
+    </article>
+
+    <!-- 24 -->
+    <article class="sc new" id="s24">
+      <header><span class="no">24</span><h3>首页 · 今日 0 支</h3><span class="role">每天第一眼</span>
+        <span class="badges"><span class="tagx">新增</span></span></header>
+      <p class="sub">用户每天打开 App 看到的就是这个状态，之前画布上只有「全空」和「已取 4 支」两头。<b>本屏 = <code>02 首页</code>的「④ 今日 0 支」态</b>（同一份 HTML）。</p>
+      <div class="cols">
+        <div><h5>数值</h5><ul>
+          <li>危害分 <b>0</b>（公式 n = 0 → 恰好 0）</li>
+          <li>近期负担指数 <b>37.2</b> = 0.88×42.3 + 0.12×0 → 档位「偏低」· 胶囊<b>鼠尾草系</b></li>
+          <li>健康净值 <b>63%</b>（昨天 58%，今早涨 5 个点 —— 衰减生效）</li>
+          <li>今日成本 <b>¥0.0</b> · 今日焦油 <b>0mg</b></li>
+          <li>库存 17 支 · 进度 <b>0 / 5 支</b>（全空）</li>
+        </ul></div>
+        <div><h5>三条新规则</h5><ul>
+          <li><b>危害横幅极性随危害分走</b>：= 0 时转浅绿正向态（底 <code>#F2F7F5</code>、图标 <code>#38665F</code>），文案「轻负担 · 当日危害 0」/「今天还没有代价发生 —— 这是一天里最好的开局。」</li>
+          <li><b>放回库存置灰</b>：今日取出为 0 时没有可撤销的对象</li>
+          <li><b>肺部负担色块透明度 85% → 35%</b>，肺插画跟着负担走</li>
+        </ul></div>
+        <div><h5>意义</h5><ul>
+          <li>这一屏把模型的两件事兑现了：<b>n = 0 就是 0 分</b>、<b>净值会自己回升</b> —— 不用解释，用户看得见</li>
+          <li>也顺手补上了两端 sync checklist 里要求、但设计稿一直没画的「今日取出为 0 时置灰」状态</li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>档位胶囊配色已定稿（本屏即是起因）：</b>原方案所有档位都用琥珀，于是这里「偏低」配警示色、下方紧跟绿色正向横幅，同屏语气打架。
+        现改为<b>未越线（轻负担 / 偏低 / 中等）用鼠尾草系 <code>#DFEBE5</code>/<code>#38665F</code>，越线（偏高 / 重负担）用暖琥珀 <code>#FBEDE1</code>/<code>#C26B32</code></b>，判准与干预分级同一个（用户自设目标）。
+        本屏「偏低」用鼠尾草系，与下方绿色横幅一致。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">规格见 <code>design-spec.md</code> §9.2（＝ `02 首页`的「④ 今日 0 支」态）；画布尚未录入。</p>
+    </article>
+
+    <!-- 25 -->
+    <article class="sc new" id="s25">
+      <header><span class="no">25</span><h3>导出账本</h3><span class="role">结果 / 失败</span>
+        <span class="badges"><span class="tagx">新增</span></span></header>
+      <p class="sub">补上 07 设置里「导出戒烟账本 CSV」的下文。<b>本屏也是三态的</b>，原型里可逐态切换。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>设置副本 + 遮罩 42% + 弹层 <code>y470 h400</code>（与 08/09/11/12/21 同范式）</li>
+          <li>拖拽条 → 「导出账本」+ ✕</li>
+          <li>结果卡（成功浅绿 / 失败暖底）</li>
+          <li>一行说明 → 主按钮 → 文字链</li>
+        </ul></div>
+        <div><h5>三态</h5><ul>
+          <li><b>导出中</b>：三点呼吸动画 +「正在整理 21 条记录…」。超过 1.5s 才显示，避免闪一下。<b>不可取消</b>（本地读写无法中断，给取消只会制造不确定）</li>
+          <li><b>成功</b>：勾 + 「导出完成」+「戒烟有数-账本-2026-06-09.csv / 21 条记录 · 12 KB」→「用其他应用打开」／「存储到文件」</li>
+          <li><b>失败</b>：感叹号 + 「导出失败」+「存储空间不足，或文件正被其他应用占用。<b>数据完好，不会丢失记录。</b>」→「重试」／「取消」</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>失败文案顺序：<b>先安抚再要求操作</b> —— 与 19 屏同一条原则</li>
+          <li>这是规范里承认需要加载态的三处之一（登录验证码 / 跨设备同步 / 导出账本）</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">规格见 <code>design-spec.md</code> §9.3；画布尚未录入。</p>
+    </article>
+
+    <!-- 26 -->
+    <article class="sc new" id="s26">
+      <header><span class="no">26</span><h3>隐私政策与用户协议</h3><span class="role">合规 / 卖点</span>
+        <span class="badges"><span class="tagx">新增</span></span></header>
+      <p class="sub">关于弹层里最后一个死链的处置；也是应用市场的上架硬要求。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>导航头：返回 + 「隐私政策与用户协议」</li>
+          <li>标题块「你的数据在哪，你最该知道」+「戒烟有数是本地优先：记录先写在本机，同步是可选的。」</li>
+          <li>5 个白卡 + 1 个浅绿卡（联系方式）</li>
+          <li>页脚「更新于 2026-06-09 · 适用版本 0.1（模型 A1）」</li>
+        </ul></div>
+        <div><h5>六节</h5><ul>
+          <li>一、我们收集什么 —— 什么都不收集</li>
+          <li>二、数据存在哪 —— 应用私有目录，卸载即删除</li>
+          <li>三、什么时候会离开本机 —— 只有你主动开同步；传输前本机加密，服务端只存密文</li>
+          <li>四、导出与删除 —— 由你发起，立即且不可恢复</li>
+          <li>五、关于健康数据 —— 自测指标，不构成医学诊断</li>
+          <li>六、联系我们 —— feedback@quitcount.app（占位，待产品方确认）</li>
+        </ul></div>
+        <div><h5>为什么值得做</h5><ul>
+          <li>应用市场没有隐私政策页是<b>常见驳回原因</b></li>
+          <li>对本地优先的产品，这一屏的核心不是法律免责，而是把「你的数据不上云」落到实处 —— 它本来就是最该被看见的卖点</li>
+          <li>刻意不抄模板长文：模板长文没人读</li>
+        </ul></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">规格见 <code>design-spec.md</code> §9.4；画布尚未录入。</p>
+    </article>
+
+    <!-- 27 -->
+    <article class="sc new" id="s27">
+      <header><span class="no">27</span><h3>品牌详情</h3><span class="role">单个库存的编辑与删除</span>
+        <span class="badges"><span class="tagx">新增</span></span></header>
+      <p class="sub">N7 的落地屏。补上资产页只能整批清空、单个品牌无路可走的缺口。复用 11 屏 添加资产 的字段结构 + 21 屏 记录明细 的"可改可删"范式。</p>
+      <div class="cols">
+        <div><h5>结构</h5><ul>
+          <li>资产副本 + 遮罩 42% + 弹层 <code>y240 h640</code>（与 11 同高）</li>
+          <li>拖拽条 → 标题「编辑资产」+ ✕</li>
+          <li>品牌（整行，预填「云烟 细支」）</li>
+          <li>焦油含量 ｜ 尼古丁（2 列，8mg ／ 0.8mg）</li>
+          <li>购入数量（<b>包</b>）｜ 包装价（¥/包）</li>
+          <li>每包支数 ｜ 单支价格（只读 <b>¥1.75</b>）</li>
+          <li>剩余库存步进 <code>[−] 12 支 [+]</code> + 持有 6 天</li>
+          <li>「保存修改」实心绿 ／「删除这个品牌」白底描边暖褐</li>
+          <li>底部说明「删除后会一并移除该品牌的取出记录，当天的危害分随之重算。」</li>
+        </ul></div>
+        <div><h5>与 11 的差异</h5><ul>
+          <li>11 屏从零录入，本屏预填现值</li>
+          <li>本屏多一行 <b>剩余库存步进</b>（11 屏给的是购入包数，本屏要能直接改余量）</li>
+          <li>本屏有<b>删除</b>；11 屏没有（新加的东西不需要删）</li>
+          <li>标题「添加香烟资产」→「编辑资产」；副标「填准一点更好用」→ 由实际值构成</li>
+        </ul></div>
+        <div><h5>规则</h5><ul>
+          <li>保存是主按钮，删除是描边暖褐第二按钮 —— 与 21 屏同一范式</li>
+          <li>删除<b>给二次确认</b>（沿用 14 屏警示弹层范式 · 底部弹层，文案换成该品牌）：它连带删除历史取出记录，破坏性高于 04 屏的左滑删除</li>
+          <li>左滑删除（04 屏）<b>不给二次确认</b>：它是即时、可撤销的轻操作；两者按破坏力分级，不搞一刀切</li>
+          <li>删除后当天危害分重算，须明说「影响范围」—— 与 21 屏同一条</li>
+        </ul></div>
+      </div>
+      <div class="ok">
+        <b>为什么这屏必须存在：</b>资产页此前只能「+ 添加」和「清空库存」两个动作，中间是空的。用户买错了品牌、换了烟、或者只是想把余量改对，都没有出路 —— 只能把全部库存删掉重建。这直接违背了产品自己的原则「记错了随时改」（见 21 屏副标题）。<br>
+        <b>N7 的修法收敛为两级：</b>① 04 屏列表项整行可点 → 进本屏；② 04 屏左滑 → 直接删该品牌（可撤销，无二次确认）。编辑走详情、快删走左滑，两条路都有。
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin:10px 0 0;">规格见 <code>design-spec.md</code> §8.8；画布尚未录入（新增屏）。</p>
+    </article>
+  </div>
+
+  <!-- ============ 本轮遗漏 ============ -->
+  <div class="sec">
+    <h2>五、逐屏复核查出的遗漏 <em>7 条 · 已全部落实</em></h2>
+    <p class="lead">逐个放大核对 9 屏（01 / 08 / 09 / 12 / 14 / 16 / 19 / 20 / 21）后新发现的问题。下表给出的是<b>落实后的终态</b>，不是待办。</p>
+    <table>
+      <thead><tr><th style="width:52px;">#</th><th style="width:170px;">位置</th><th style="width:110px;">类型</th><th>处置</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td>N1</td><td><code>19</code> / <code>12</code> 屏</td><td><span class="tagx bad">副本遗漏</span></td><td><b>删除</b>两屏副本里残留的页脚「戒烟有数 · 原型版 0.1 · 本地数据 17 条」。19 屏页脚可见、12 屏被弹层遮住，两处都删。<b>同类问题第 4 次出现</b> → 已立规：主屏改动后必须列出所有带该屏副本的屏并逐一处理。</td></tr>
+        <tr class="hl"><td>N2</td><td><code>16</code> 屏</td><td><span class="tagx bad">规则冲突</span></td><td><b>改</b>为 21:30 复盘通知：时间 <code>21:42 → 21:30</code>；标题「今天的账本出来了」；正文「今日 5 支 · 危害 49 · 花费 ¥29.9。复看一遍，明天更容易。」；操作按钮「先不抽」→<b>「看今天的账本」</b>（复盘语境下"先不抽"已无意义）。</td></tr>
+        <tr><td>N3</td><td><code>01</code> 屏</td><td><span class="tagx warn">定位矛盾</span></td><td><b>定死为首次启动的一级页</b>：删返回箭头，页头改居中品牌名。判断依据：登录入口只在首次启动与 19 屏同步失败时出现，后者用设置页内提示条、不跳此屏。</td></tr>
+        <tr><td>N4</td><td><code>08</code> 屏</td><td><span class="tagx warn">产品确认</span></td><td><b>不加备注字段</b>（推翻 Flutter sync checklist 的该项要求）。三条理由见 08 屏。<b>需转告两端把 checklist 里这条改为不实现</b>，或移入 21 屏字段定义。</td></tr>
+        <tr><td>N5</td><td><code>01</code> 屏</td><td><span class="tagx mute">文案</span></td><td><b>删除「可选账户」</b>。它放在品牌标识正下方指代不明；"可以不登录"已由文字链「暂不登录，继续本地使用」完整表达。</td></tr>
+        <tr><td>N6</td><td><code>01</code> 屏</td><td><span class="tagx mute">交互</span></td><td><b>降级为两行说明文字</b>（去卡、去图标、去描边）。不做成可点入口是刻意的：同步必须有账号，未登录时点进去无处可去。降级后全屏只剩一颗实心绿按钮。</td></tr>
+        <tr class="hl"><td>N7</td><td><code>04</code> 屏</td><td><span class="tagx mute">可达性</span></td><td><b>列表项可点 + 新增 27 屏</b>。整行可点 → 27 品牌详情（改品牌 / 含量 / 余量 / 价格）；左滑 → 直接删该品牌（可撤销，无二次确认）。删除该品牌的破坏性动作走二次确认。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 已拍板 ============ -->
+  <div class="sec">
+    <h2>六、本轮已拍板 <em class="w">3 项</em></h2>
+    <table>
+      <thead><tr><th style="width:200px;">事项</th><th style="width:120px;">结论</th><th>理由</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td><b>04 资产页总览卡配色</b></td><td><span class="tagx">改白底描边</span></td><td>实心绿在全 App 独占「推荐选项」，而这块卡不可点，是全 App 唯一的破例；与 05 账本同位置语言对齐；「健康负债 −¥52.0」改白底后用<b>琥珀</b>写 —— 代价色本来就是它的正确语义。代价是资产页首屏少一层明暗节奏，用指标排浅绿底 + Hint 卡补回。</td></tr>
+        <tr class="hl"><td><b>档位胶囊是否随档位走</b></td><td><span class="tagx">随档位走</span></td><td>未越线（轻负担 / 偏低 / 中等）用鼠尾草系 <code>#DFEBE5</code>/<code>#38665F</code>；越线（偏高 / 重负担）用暖琥珀 <code>#FBEDE1</code>/<code>#C26B32</code>。判准与干预分级同一个（用户自设目标）。起因是 24 屏「偏低」配琥珀、下方紧跟绿色正向横幅，同屏语气打架。<b>可见改动：02 首页「中等」胶囊由琥珀变鼠尾草色。</b></td></tr>
+        <tr><td><b>反馈邮箱与开发者主体</b></td><td><span class="tagx mute">待产品方填值</span></td><td>设计侧已定稿为<b>调起系统邮件</b>（主题预填「戒烟有数 0.1 · 模型 A1」，正文带机型与系统版本）；收件人暂用占位 <code>feedback@quitcount.app</code>，<b>上架前必须换成真实邮箱</b>。这是唯一一处外部依赖，不影响其余 27 屏定稿。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 施工状态 ============ -->
+  <div class="sec">
+    <h2>七、施工状态 <em>STATUS</em></h2>
+    <table>
+      <thead><tr><th style="width:230px;">轮次</th><th style="width:150px;">设计侧</th><th style="width:170px;">画布</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>画布本体（22 屏）</td><td><span class="tagx">已完成</span></td><td><span class="tagx">已录入</span></td><td>首页改造、5 档改名、模型重标定与口径统一、副本一致性清理、22 屏新增</td></tr>
+        <tr class="hl"><td>施工稿 v1（8 条）</td><td><span class="tagx">已定稿</span></td><td><span class="tagx mute">待录入</span></td><td>01 验证码步骤（原 01b 已并入 01）· 23 取出成功 · 关于链接 4→3 · 操作区宽度 · 10 屏净值卡补句 · 遮罩两级 · 首页第三格口径 · 标识替换</td></tr>
+        <tr class="hl"><td>施工稿 v2（6 条）</td><td><span class="tagx">已定稿</span></td><td><span class="tagx mute">待录入</span></td><td>15 屏字号 · 24 今日 0 支 · 25 导出账本 · 26 隐私政策 · 档位胶囊配色 · 屏序重排</td></tr>
+        <tr class="hl"><td>遗漏修订（N1–N7）</td><td><span class="tagx">已定稿</span></td><td><span class="tagx mute">待录入</span></td><td>N1 副本页脚 · N2 通知规则 · N3 01 定位 · N4 不加备注 · N5 删可选账户 · N6 底部卡降级 · N7 新增 27 屏</td></tr>
+        <tr><td>本轮新增屏</td><td><span class="tagx">已定稿</span></td><td><span class="tagx mute">待录入</span></td><td><b>27 品牌详情</b>（N7 的落地屏，也是本轮的最后一屏）</td></tr>
+      </tbody>
+    </table>
+    <div class="rec">
+      <b>设计侧已全部收口，只剩画布录入这一个动作。</b>屏数 22 → <b>27</b>（新增 23 / 24 / 25 / 26 / 27，共 5 屏；原拟新增的 <code>01b 验证码</code> 已并入 <code>01</code>，不再独立成屏）。
+      画布恢复后应<b>一次性把所有未录入条目做完，再重排屏序、重导切图</b> —— 分批做会让编号与位置反复错位，这是前几轮反复出问题的根源。
+      <br><br><b>两处跨端待办（非设计缺口）：</b>① Flutter sync checklist 的「取烟 Sheet 备注」需按 N4 改为不实现；② <code>feedback@quitcount.app</code> 换成真实邮箱。除此之外，本文件即为实现与验收的唯一依据。
+    </div>
+  </div>
+
+  <footer>
+    <div>戒烟有数 · 逐屏设计稿（27 屏）</div>
+    <div>模型参数：饱和 5.2 · 焦油基准 9mg/支 · λ = 0.12 · 档位 20 / 40 / 60 / 80</div>
+  </footer>
+
+</div>
+</body>
+</html>

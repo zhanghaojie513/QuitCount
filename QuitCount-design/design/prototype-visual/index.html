@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>戒烟有数 · 原型（27 屏）</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="tb-left">
+    <span class="tb-mark"></span>
+    <div>
+      <h1>戒烟有数</h1>
+      <p id="tbSub">原型 · 27 屏 · 按设计稿 1:1 还原</p>
+      <p class="caliber-note">口径以 <code>design/design-spec.md</code> §4（模型 A1）为准 · 本原型为落地参照，非权威</p>
+    </div>
+  </div>
+  <div class="tb-right">
+    <span class="kb-hint">← → 翻屏 · ↑ ↓ 切态 · Esc 返回</span>
+    <div class="seg" id="scaleSeg">
+      <button data-scale="0.8">80%</button>
+      <button data-scale="1" class="on">100%</button>
+      <button data-scale="1.2">120%</button>
+      <button data-scale="1.4">140%</button>
+    </div>
+  </div>
+</header>
+
+<main class="stage">
+  <!-- 流程条：按真实使用路径分组，不是平铺索引 -->
+  <nav class="flowbar" id="flowbar"></nav>
+
+  <section class="viewport">
+    <div class="device">
+      <div class="phone" id="phone"></div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="under" id="under"></div>
+  </section>
+</main>
+
+<script src="screens.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

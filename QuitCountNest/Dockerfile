@@ -8,7 +8,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 FROM dependencies AS build
-COPY nest-cli.json tsconfig.json tsconfig.build.json ./
+COPY nest-cli.json tsconfig.json tsconfig.build.json prisma.config.ts ./
+COPY prisma ./prisma
 COPY src ./src
 RUN npm run build && npm prune --omit=dev
 
@@ -22,4 +23,3 @@ COPY --from=build --chown=node:node /app/dist ./dist
 USER node
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
-

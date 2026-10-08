@@ -1,0 +1,26 @@
+# ============================================================
+# QuitCount-design · 忽略规则
+# ============================================================
+# 原则：只忽略「可自动重生的中间产物」。
+# 设计资产、切图、原型、文档全部入库 —— 它们是交付物，不是产物。
+
+# ---- 原型的中转页（每次重导切图时由 qa/make-export-page.py 重生）----
+design/prototype-visual/_export.html
+
+# ---- 验证/重导脚本的临时输出 ----
+design/prototype-visual/_probe.html
+design/prototype-visual/_shot*.png
+design/prototype-visual/_*.js
+
+# ---- 系统与编辑器杂项 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.venv/
+venv/

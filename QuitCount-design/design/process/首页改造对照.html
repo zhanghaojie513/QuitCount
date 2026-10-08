@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>戒烟有数 · 首页改造对照</title>
+<style>
+  :root{
+    --ink:#1A211E; --sage:#38665F; --sage-mid:#4E8B7E; --sage-light:#6BA8A0;
+    --tint:#DFEBE5; --tint-soft:#F2F7F5; --cream:#F8F6F2; --line:#EDE9E1;
+    --muted:#8A948D; --muted-2:#9AA39D; --amber:#C26B32; --amber-bg:#FBEDE1;
+    --amber-soft:#F7DCCF; --warm:#B4553F; --disabled:#C6CFC9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#EFEDE8;font-family:"Noto Sans SC","PingFang SC",-apple-system,sans-serif;
+       color:var(--ink);padding:40px 32px 56px;-webkit-font-smoothing:antialiased;}
+  .wrap{display:flex;gap:36px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+  .col{display:flex;flex-direction:column;gap:14px;}
+  .caption{font-size:13px;font-weight:500;}
+  .caption span{font-weight:400;color:var(--muted);font-size:12px;}
+  .phone{position:relative;width:393px;height:852px;background:var(--cream);border-radius:44px;
+         overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 50px -12px rgba(26,33,30,.22);}
+  .statusbar{height:62px;display:flex;align-items:center;justify-content:space-between;
+             padding:0 30px 0 34px;font-size:16px;font-weight:500;flex:none;}
+  .sbar-icons{display:flex;gap:5px;align-items:center;}
+  .sbar-icons i{display:block;border:1.4px solid var(--ink);border-radius:3px;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;padding:0 20px;flex:none;}
+  .appname{font-size:22px;font-weight:500;line-height:1.2;}
+  .appdate{font-size:12px;color:var(--muted);margin-top:3px;font-weight:400;}
+  .pill{display:flex;align-items:center;gap:5px;background:#EAF2EF;border-radius:999px;
+        padding:5px 10px;font-size:11px;color:var(--sage);font-weight:500;}
+  .card{background:#fff;border-radius:24px;margin:14px 20px 0;flex:none;}
+  .hero{padding:24px 20px 8px;}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;}
+  .hero-label{font-size:12px;color:var(--muted);font-weight:500;}
+  .chip{font-size:10px;font-weight:500;padding:4px 9px;border-radius:999px;}
+  .chip-amber{background:var(--amber-bg);color:var(--amber);}
+  .hero-num{margin-top:12px;display:flex;align-items:baseline;}
+  .hero-num b{font-size:56px;font-weight:500;line-height:1;letter-spacing:-1px;}
+  .hero-num span{font-size:12px;color:var(--muted);margin-left:4px;}
+  .track{height:8px;border-radius:4px;background:#F0ECE4;margin-top:12px;overflow:hidden;}
+  .track i{display:block;height:100%;width:56%;background:var(--sage-light);}
+  .hero-cap{font-size:11px;color:var(--muted-2);margin-top:12px;}
+  .lungcard{padding:16px;}
+  .meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;}
+  .live{display:flex;align-items:center;gap:5px;color:var(--sage-mid);font-weight:500;}
+  .live i{width:6px;height:6px;border-radius:50%;background:var(--sage-mid);display:block;}
+  .anno{color:var(--muted-2);}
+  .lungstage{height:134px;display:flex;align-items:center;justify-content:center;}
+  .banner{display:flex;gap:11px;background:var(--amber-bg);border-radius:18px;padding:13px;}
+  .banner-ico{width:34px;height:34px;border-radius:11px;background:var(--amber-soft);flex:none;
+              display:flex;align-items:center;justify-content:center;}
+  .banner-t{font-size:13px;font-weight:500;color:#A85E28;}
+  .banner-d{font-size:11px;color:#B07A45;margin-top:3px;line-height:1.5;}
+  .metrics{display:flex;gap:10px;margin:14px 20px 0;flex:none;}
+  .metric{flex:1;background:#fff;border-radius:18px;padding:14px 12px;text-align:center;}
+  .metric b{display:block;font-size:20px;font-weight:500;line-height:1.2;}
+  .metric span{display:block;font-size:11px;color:var(--muted);margin-top:4px;}
+  .actions{display:flex;gap:10px;margin:14px 20px 0;flex:none;}
+  .btn{flex:1;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:7px;
+       font-size:15px;font-weight:500;}
+  .btn-tint{background:var(--tint);color:var(--sage);}
+  .btn-ghost{background:#fff;border:1px solid #E4E0D8;color:#5C6660;}
+  .progress{flex:1;height:54px;border-radius:16px;background:#fff;border:1px solid #E4E0D8;
+            padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:7px;}
+  .progress-top{display:flex;justify-content:space-between;font-size:11px;}
+  .progress-top span:first-child{color:var(--muted);}
+  .progress-top span:last-child{color:var(--ink);font-weight:500;}
+  .seg{display:flex;gap:3px;}
+  .seg i{flex:1;height:5px;border-radius:3px;background:var(--line);display:block;}
+  .seg i.on{background:var(--sage-light);}
+  .tabbar{height:95px;padding:12px 21px 21px;margin-top:auto;flex:none;}
+  .pillbar{height:62px;background:#fff;border-radius:31px;padding:4px;display:flex;align-items:center;gap:4px;}
+  .tab{flex:1;height:54px;border-radius:26px;display:flex;flex-direction:column;align-items:center;
+       justify-content:center;gap:3px;color:var(--muted-2);font-size:10px;font-weight:500;}
+  .tab.on{background:var(--sage);color:#fff;}
+  .tab.mid{flex:none;width:64px;color:var(--sage);}
+  .tab.mid.off{color:var(--disabled);}
+  .toast{position:absolute;left:20px;right:20px;top:118px;background:var(--tint-soft);border-radius:14px;
+         padding:12px 14px;display:flex;align-items:center;gap:10px;
+         box-shadow:0 10px 28px -10px rgba(26,33,30,.22);}
+  .toast-ico{width:22px;height:22px;border-radius:50%;background:var(--sage-mid);flex:none;
+             display:flex;align-items:center;justify-content:center;}
+  .toast-t{font-size:13px;font-weight:500;color:var(--sage);}
+  .toast-d{font-size:11px;color:#4A6B60;margin-top:3px;}
+  .notes{max-width:822px;margin:40px auto 0;font-size:13px;line-height:1.8;color:#4A524D;}
+  .notes h3{font-size:14px;font-weight:500;margin:0 0 8px;}
+  .notes ol{margin:0;padding-left:22px;}
+  .notes code{background:#E4E1DA;border-radius:4px;padding:1px 5px;font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="col">
+    <div class="caption">现行稿 <span>· 三处问题</span></div>
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span class="sbar-icons"><i style="width:17px;height:11px"></i><i style="width:24px;height:11px"></i></span></div>
+      <div class="header">
+        <div><div class="appname">戒烟有数</div><div class="appdate">今日 · 06/09</div></div>
+        <div class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 20V9M12 20V4M20 20v-7" stroke="#38665F" stroke-width="2.4" stroke-linecap="round"/></svg>模型 A1</div>
+      </div>
+      <div class="card hero">
+        <div class="hero-top"><span class="hero-label">肺部负担指数</span><span class="chip chip-amber">偏高</span></div>
+        <div class="hero-num"><b>42.3</b><span>/ 100</span></div>
+        <div class="track"><i></i></div>
+        <div class="hero-cap">库存 17 支 · 今日取出 4 支 · 目标每日少于 5 支</div>
+      </div>
+      <div class="card lungcard">
+        <div class="meta"><span class="live"><i></i>实时渲染</span><span class="anno">每取出一支 · 肺色加深 1.9%</span></div>
+        <div class="lungstage">
+          <svg width="150" height="126" viewBox="0 0 240 200" fill="none"><circle cx="120" cy="106" r="88" fill="#F4F9F7"/><path d="M104 56C104 56 72 62 54 92C36 122 42 162 70 178C92 190 112 176 112 150V72C112 60 110 56 104 56Z" fill="#DCEBE3" stroke="#A6CBBB" stroke-width="2.5"/><path d="M136 56C136 56 168 62 186 92C204 122 198 162 170 178C148 190 128 176 128 150V72C128 60 130 56 136 56Z" fill="#DCEBE3" stroke="#A6CBBB" stroke-width="2.5"/><ellipse cx="80" cy="158" rx="28" ry="16" fill="#E4B58F" opacity="0.85"/><ellipse cx="160" cy="158" rx="28" ry="16" fill="#E4B58F" opacity="0.85"/><path d="M120 12V68" stroke="#A6CBBB" stroke-width="9" stroke-linecap="round"/><path d="M120 66C120 80 114 90 103 96" stroke="#A6CBBB" stroke-width="5" stroke-linecap="round"/><path d="M120 66C120 80 126 90 137 96" stroke="#A6CBBB" stroke-width="5" stroke-linecap="round"/><path d="M86 110C79 122 79 132 84 140" stroke="#C6DCD2" stroke-width="2.5" stroke-linecap="round"/><path d="M154 110C161 122 161 132 156 140" stroke="#C6DCD2" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="card banner">
+        <div class="banner-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="#C26B32" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 9.5v4" stroke="#C26B32" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="16.8" r="1.2" fill="#C26B32"/></svg></div>
+        <div><div class="banner-t">高危 · 当日危害 64</div><div class="banner-d">少量吸烟也不安全，别把「少抽」当成低风险。</div></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><b>¥24.7</b><span>真实日耗</span></div>
+        <div class="metric"><b style="color:#38665F">58%</b><span>健康净值</span></div>
+        <div class="metric"><b>121mg</b><span>库存焦油</span></div>
+      </div>
+      <div class="actions">
+        <div class="btn btn-tint"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#38665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>取出一支</div>
+        <div class="btn btn-ghost">放回库存</div>
+      </div>
+      <div class="tabbar"><div class="pillbar">
+        <div class="tab on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>首页</div>
+        <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="3" stroke="#9AA39D" stroke-width="1.9"/><path d="M16 12.5h2" stroke="#9AA39D" stroke-width="1.9" stroke-linecap="round"/></svg>资产</div>
+        <div class="tab mid"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#38665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>取出</div>
+        <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5.5h7a3 3 0 0 1 3 3v10a2.4 2.4 0 0 0-2.4-2.4H4Z" stroke="#9AA39D" stroke-width="1.9" stroke-linejoin="round"/><path d="M20 5.5h-3.6v12.6" stroke="#9AA39D" stroke-width="1.9" stroke-linejoin="round"/></svg>账本</div>
+        <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.6" stroke="#9AA39D" stroke-width="1.9"/><path d="M5 19.5a7 7 0 0 1 14 0" stroke="#9AA39D" stroke-width="1.9" stroke-linecap="round"/></svg>我的</div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="caption">改造后 <span>· 三处已应用</span></div>
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span class="sbar-icons"><i style="width:17px;height:11px"></i><i style="width:24px;height:11px"></i></span></div>
+      <div class="header">
+        <div><div class="appname">戒烟有数</div><div class="appdate">今日 · 06/09</div></div>
+        <div class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 20V9M12 20V4M20 20v-7" stroke="#38665F" stroke-width="2.4" stroke-linecap="round"/></svg>模型 A1</div>
+      </div>
+      <div class="toast">
+        <div class="toast-ico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m5 13 4.5 4.5L19 7" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><div class="toast-t">今天第 3 次忍住</div><div class="toast-d">这一支没抽，少摄入焦油 8mg · 省下 ¥1.75</div></div>
+      </div>
+      <div class="card hero">
+        <div class="hero-top"><span class="hero-label">肺部负担指数</span><span class="chip chip-amber">偏高</span></div>
+        <div class="hero-num"><b>42.3</b><span>/ 100</span></div>
+        <div class="track"><i></i></div>
+        <div class="hero-cap">库存 17 支 · 今日取出 4 支 · 目标每日少于 5 支</div>
+      </div>
+      <div class="card lungcard">
+        <div class="meta"><span class="live"><i></i>实时渲染</span><span class="anno">每取出一支 · 肺色加深 1.9%</span></div>
+        <div class="lungstage">
+          <svg width="150" height="126" viewBox="0 0 240 200" fill="none"><circle cx="120" cy="106" r="88" fill="#F4F9F7"/><path d="M104 56C104 56 72 62 54 92C36 122 42 162 70 178C92 190 112 176 112 150V72C112 60 110 56 104 56Z" fill="#DCEBE3" stroke="#A6CBBB" stroke-width="2.5"/><path d="M136 56C136 56 168 62 186 92C204 122 198 162 170 178C148 190 128 176 128 150V72C128 60 130 56 136 56Z" fill="#DCEBE3" stroke="#A6CBBB" stroke-width="2.5"/><ellipse cx="80" cy="158" rx="28" ry="16" fill="#E4B58F" opacity="0.85"/><ellipse cx="160" cy="158" rx="28" ry="16" fill="#E4B58F" opacity="0.85"/><path d="M120 12V68" stroke="#A6CBBB" stroke-width="9" stroke-linecap="round"/><path d="M120 66C120 80 114 90 103 96" stroke="#A6CBBB" stroke-width="5" stroke-linecap="round"/><path d="M120 66C120 80 126 90 137 96" stroke="#A6CBBB" stroke-width="5" stroke-linecap="round"/><path d="M86 110C79 122 79 132 84 140" stroke="#C6DCD2" stroke-width="2.5" stroke-linecap="round"/><path d="M154 110C161 122 161 132 156 140" stroke="#C6DCD2" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="card banner">
+        <div class="banner-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="#C26B32" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 9.5v4" stroke="#C26B32" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="16.8" r="1.2" fill="#C26B32"/></svg></div>
+        <div><div class="banner-t">中等负担 · 当日危害 64</div><div class="banner-d">少量吸烟也不安全，别把「少抽」当成低风险。</div></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><b>¥24.7</b><span>真实日耗</span></div>
+        <div class="metric"><b style="color:#38665F">58%</b><span>健康净值</span></div>
+        <div class="metric"><b>121mg</b><span>库存焦油</span></div>
+      </div>
+      <div class="actions">
+        <div class="progress">
+          <div class="progress-top"><span>今日</span><span>4 / 5 支</span></div>
+          <div class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+        </div>
+        <div class="btn btn-ghost">放回库存</div>
+      </div>
+      <div class="tabbar"><div class="pillbar">
+        <div class="tab on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>首页</div>
+        <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="3" stroke="#9AA39D" stroke-width="1.9"/><path d="M16 12.5h2" stroke="#9AA39D" stroke-width="1.9" stroke-linecap="round"/></svg>资产</div>
+        <div class="tab mid"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#38665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>取出</div>
+        <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5.5h7a3 3 0 0 1 3 3v10a2.4 2.4 0 0 0-2.4-2.4H4Z" stroke="#9AA39D" stroke-width="1.9" stroke-linejoin="round"/><path d="M20 5.5h-3.6v12.6" stroke="#9AA39D" stroke-width="1.9" stroke-linejoin="round"/></svg>账本</div>
+        <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.6" stroke="#9AA39D" stroke-width="1.9"/><path d="M5 19.5a7 7 0 0 1 14 0" stroke="#9AA39D" stroke-width="1.9" stroke-linecap="round"/></svg>我的</div>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notes">
+  <h3>改造说明</h3>
+  <ol>
+    <li><b>删除首页「取出一支」</b> —— 与底部导航中间的「取出」是同一件事，同一屏两个入口。删掉后位置让给「今日进度」。</li>
+    <li><b>新增「今日进度」</b> —— <code>今日 4 / 5 支</code> + 5 格进度条（目标 5 支，已取 4 支）。补上"用户想随时知道今天第几支却无处可看"的缺口。</li>
+    <li><b>危害分档位改名</b> —— <code>高危 · 当日危害 64</code> 改为 <code>中等负担 · 当日危害 64</code>。原方案在 4 支时同时显示「高危」和「目标每日少于 5 支」，用户没超标却被判高危；且自测模型不应下医学判词。</li>
+    <li><b>新增「忍住」正反馈</b> —— 点「好，今天先不抽」后，顶部浮出浅绿反馈条 <code>✓ 今天第 3 次忍住</code>。此前产品只给失败三重反馈（记录 + 警示 + 通知），对成功零回应。</li>
+  </ol>
+  <p style="margin:12px 0 0;color:#8A948D;font-size:12px;">
+    提示：反馈条为 <b>悬停层（absolute overlay）</b>，不占常驻布局 —— 否则每次出现/消失都会让整页跳动。与「通知权限」细条同处页头下方时，<b>临时反馈优先级更高</b>。
+  </p>
+</div>
+</body>
+</html>

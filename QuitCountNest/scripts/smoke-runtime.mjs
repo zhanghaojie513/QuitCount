@@ -18,9 +18,13 @@ child.stderr.on('data', (chunk) => {
 async function waitUntilReady() {
   for (let attempt = 0; attempt < 30; attempt += 1) {
     try {
-      const response = await fetch(`http://127.0.0.1:${port}/`);
-      if (response.status === 200 && (await response.text()) === 'Hello World!')
-        return;
+      const response = await fetch(
+        `http://127.0.0.1:${port}/api/v1/health/live`,
+      );
+      if (response.status === 200) {
+        const payload = await response.json();
+        if (payload.status === 'ok') return;
+      }
     } catch {
       // Startup is still in progress.
     }
@@ -38,7 +42,9 @@ try {
     delay(5000, false),
   ]);
   if (!exited) throw new Error(`runtime did not exit after ${signal}`);
-  console.log(`runtime:smoke ok (GET / = 200, exited after ${signal})`);
+  console.log(
+    `runtime:smoke ok (GET /api/v1/health/live = 200, exited after ${signal})`,
+  );
 } finally {
   if (child.exitCode === null && child.signalCode === null) child.kill();
 }

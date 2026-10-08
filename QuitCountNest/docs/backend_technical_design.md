@@ -1,6 +1,6 @@
 # 戒烟有数后端技术设计
 
-> 状态：设计草案，2026-07-15。NestJS 11 工程、Stage 0 契约和 Stage 1 质量/容器/CI 配置已建立；本机缺少 Docker CLI，容器运行和远端 CI 尚未验证。数据库、云账号、短信供应商、域名、部署环境和领域业务仍不存在。
+> 状态：实施中，2026-07-24。NestJS 11 工程、Stage 0 契约和 Stage 1 质量/容器/CI 配置已建立，Stage 2 平台基础正在实现；用户已确认拥有华为云账号并将华为云作为优先部署平台，但尚未确认地域、资源规格、域名、生产网络或已创建任何云资源。本机缺少 Docker CLI，容器运行和远端 CI 尚未验证。
 
 ## 1. 文档定位与事实标记
 
@@ -61,7 +61,7 @@
 | Runtime | **【已确认事实】开发基线为 Node.js `24.16.0` + npm `11.13.0`**；生产镜像仍待运维确认 | `.node-version`、`packageManager` 和 `engines` 已固定开发主线；截至 2026-07-14，Node 24 为 LTS。生产只使用受支持 LTS，并固定镜像 digest。参考 [Node.js Releases](https://nodejs.org/en/about/previous-releases)。 |
 | 框架 | **【已确认事实】NestJS 11 工程已初始化** | 当前核心运行包为 `11.1.28`。后续实现必须以 NestJS 11 官方文档和已安装类型定义为依据，不得新增已废弃 API；升级框架前先做 migration guide、编译、测试和契约验证。参考 [NestJS migration guide](https://docs.nestjs.com/migration-guide)。 |
 | HTTP | REST JSON + `/api/v1` + **OpenAPI 3.0.3** | **【建议选型】** 3.0.3 与 NestJS `@nestjs/swagger` 的 code-first 工具链更稳妥；同步用专用批量端点。若未来必须使用 OpenAPI 3.1，应改为 contract-first，并在 ADR 中确认生成器、lint、客户端代码生成和兼容性验证，不得只改版本号。 |
-| 数据库 | **【ADR 已接受】PostgreSQL 18 当前安全 minor** | 事务、约束、部分唯一索引、`timestamptz`、`numeric`、JSONB 和增量游标适合本领域。若 Stage 2 最终托管平台不支持 18，需经 ADR 修订回退 PostgreSQL 17；不得静默改变。参考 [ADR-002](./adr/ADR-002-runtime-framework-database.md)。 |
+| 数据库 | **【ADR 已接受】PostgreSQL 18 当前安全 minor；【待确认】华为云 RDS 版本调整** | 事务、约束、部分唯一索引、`timestamptz`、`numeric`、JSONB 和增量游标适合本领域。华为云 2026-07-15 的购买文档显示 RDS for PostgreSQL 当前最高示例版本为 17，且地域能力不同；若使用托管 RDS，应通过 ADR-012 正式回退 PostgreSQL 17 当前安全 minor。若坚持 PostgreSQL 18，则需自管数据库或等待目标地域提供托管 18，不能静默改变。参考 [ADR-002](./adr/ADR-002-runtime-framework-database.md) 与 [ADR-012](./adr/ADR-012-huawei-cloud-deployment.md)。 |
 | ORM/迁移 | **【ADR 已接受】Prisma ORM + 受审 SQL migration** | 类型安全、schema 与迁移可审查；部分唯一索引、检查约束和并发细节用 SQL migration 补充。事务需短小，生产禁止自动同步 schema。参考 [ADR-003](./adr/ADR-003-orm-and-migrations.md)。 |
 | ORM 备选 | TypeORM + 显式 migration | 若团队更熟悉 decorator/repository、需更直接操控 SQL，可选 TypeORM。禁止运行时 `synchronize: true`。选型必须记录 ADR，不混用两套 ORM。 |
 | 配置 | `@nestjs/config` + 启动时 schema 校验 | 缺少关键配置应快速失败；密钥只来自 secret manager/运行环境，不提交仓库。 |
@@ -69,6 +69,7 @@
 | 测试 | Jest、Supertest、Testcontainers/PostgreSQL、OpenAPI contract tests | 单元、集成、端到端和真实数据库约束分层验证。Testcontainers 是否可用于 CI 由运行器能力确认。 |
 | 容器化 | 非 root、多阶段 OCI 镜像；本地用 Compose | 镜像只含生产依赖，固定 digest，提供健康检查；不把 Compose 视为生产编排。 |
 | CI | lint、typecheck、unit、integration、migration smoke、OpenAPI diff、image scan | GitHub Actions、GitLab CI 或其他平台尚未确认，流水线语义先固定。 |
+| 云部署 | **【已确认事实】华为云为优先平台；【建议选型】CAE + SWR + RDS for PostgreSQL** | MVP 优先评估 CAE 托管 OCI 镜像，SWR 保存私有镜像，RDS 承载 PostgreSQL，LTS/AOM 承载日志与监控；需要 Kubernetes 控制面、复杂弹性或多工作负载时再评估 CCE Autopilot/Standard。地域、预算、配额和实际服务可用性仍待确认。参考 [ADR-012](./adr/ADR-012-huawei-cloud-deployment.md)。 |
 
 ## 4. 总体架构与模块边界
 
@@ -327,6 +328,24 @@ DTO 建议按用途而非数据库表命名，例如 `CreateAssetRequest`、`Upd
 - 云端导出/删除 worker 故障：任务保持可重试状态，用户可查询，不重复执行不可幂等步骤。
 - 部分批量冲突：按项返回，禁止整批静默成功；重试只发送未确认项。
 
+### 11.4 华为云建议拓扑
+
+**【已确认事实】** 用户拥有华为云账号，华为云是首选部署平台；这不代表生产资源、备案域名、证书、VPC、数据库或监控已经存在。
+
+**【建议选型，待成本与地域确认】MVP 拓扑：**
+
+- `GitHub Actions` 构建、测试和扫描不可变 OCI 镜像，以 commit SHA 标记并推送华为云 `SWR` 私有仓库。
+- `CAE` 从 SWR 部署 NestJS 无状态 API，至少配置 liveness/readiness、滚动升级、回退、最小/最大实例数和生产资源上限。CAE 支持容器镜像部署、应用生命周期管理与弹性伸缩，适合当前单体 API 的低运维起步。
+- `RDS for PostgreSQL` 置于同地域 VPC 私网，不暴露公网；迁移账户与应用账户分离。当前官方资料显示最高为 PostgreSQL 17，最终版本必须按目标地域控制台复核并通过 ADR-012。
+- `LTS` 接收应用 JSON 日志和平台访问日志，`AOM/CES` 负责指标、健康、告警；日志继续执行令牌、assertion、备注与导出内容脱敏。
+- `DEW/KMS/CSMS` 或平台等价 Secret 能力保存数据库凭据、JWT 密钥和加密密钥；不得把 Secret 写入镜像、GitHub workflow 明文或仓库。
+- `OBS` 仅用于经批准的短期导出文件、备份或日志归档；桶默认私有、服务端加密、短时签名下载并配置生命周期清理。
+- 域名、HTTPS 证书、DNS、WAF/APIG/ELB 是否需要由流量、备案与成本决定；数据库安全组只允许应用和迁移执行器访问。
+
+**扩展路径：** 当出现多服务、定时/异步工作负载、复杂灰度、Kubernetes 运维能力或明确高可用需求时，迁移至 `CCE Autopilot` 或 `CCE Standard`；镜像、健康检查、环境变量、Secret 和数据库契约保持不变。不得为了“云原生”标签在无容量证据时提前承担 CCE 集群复杂度。
+
+华为云资源应使用 IaC 管理并按 `dev/staging/prod` 隔离；实际 IaC 工具、账号结构、地域与命名规范在 Stage 8 前确认。官方能力依据见 [CAE 产品介绍](https://support.huaweicloud.com/productdesc-cae/cae_01_0001.html)、[SWR 产品介绍](https://support.huaweicloud.com/productdesc-swr/swr_03_0001.html)、[CCE 产品介绍](https://support.huaweicloud.com/productdesc-cce/cce_productdesc_0001.html)、[RDS for PostgreSQL 购买说明](https://support.huaweicloud.com/usermanual-rds-pg/rds_pg_10_0028.html) 与 [LTS 云服务接入](https://support.huaweicloud.com/intl/zh-cn/usermanual-lts/lts_04_0510.html)。
+
 ## 12. OpenAPI 与 Harmony 集成策略
 
 1. Stage 0 已以 OpenAPI 3.0.3 创建 `openapi/backend-v1.yaml`，以 DTO、错误码、分页、同步 envelope 和示例为契约源。未来升级 3.1 必须单独 ADR，并验证 Nest 生成、lint 和 Harmony client 工具链。
@@ -342,14 +361,15 @@ DTO 建议按用途而非数据库表命名，例如 `CreateAssetRequest`、`Upd
 
 - 多设备离线同时消费最后库存会产生超卖冲突；需显式冲突 UX，不能靠 LWW 掩盖。
 - 当前 Harmony 历史数据缺少 return 关联、模型版本和精确金额，首次迁移需要兼容标记与对账。
-- 账户认证、部署地区、数据保留和删除 SLA 未确定，可能影响 schema 与供应商。
+- 账户认证、华为云部署地区、数据保留和删除 SLA 未确定，可能影响 schema、资源可用性与供应商配置。
 - 模型算法被误解为医学结论；API 和文案必须持续带非医学诊断边界。
 - Preferences 全量 JSON 规模增长可能在启用同步前成为客户端迁移风险。
 
 ### 13.2 待确认决策
 
 - 账户方式：匿名账户升级、邮箱、短信还是第三方；是否允许无密码登录。
-- CI/部署平台、地区与高可用级别；PostgreSQL 18 + Prisma 已由 ADR-002/003 接受，但真实托管兼容性仍须 Stage 2 复核。
+- 部署平台已优先选择华为云；仍需确认账号/IAM 结构、地域、CAE 或 CCE、网络、域名、备案、资源规格、预算与高可用级别。
+- PostgreSQL 18 + Prisma 已由 ADR-002/003 接受，但华为云 RDS 当前最高公开版本为 17；必须在 Stage 2 真实连接前接受 ADR-012 的 RDS 17 路线，或明确选择自管 PostgreSQL 18。
 - 货币是否首期只支持 CNY；历史元金额转分的舍入策略。
 - goal 的合法范围、资产删除语义、跨日 return 是否永远禁止或允许纠错流程。
 - 云端导出格式、账户删除冷静期、法定保留期、备份 RPO/RTO。
@@ -357,7 +377,7 @@ DTO 建议按用途而非数据库表命名，例如 `CreateAssetRequest`、`Upd
 
 ### 13.3 Stage 0 ADR 清单
 
-- ADR-001 至 ADR-006、ADR-008、ADR-010、ADR-011 已接受；ADR-007（认证供应商/方式）与 ADR-009（法定保留和备份 SLA）保持 proposed。
+- ADR-001 至 ADR-006、ADR-008、ADR-010、ADR-011 已接受；ADR-007（认证供应商/方式）、ADR-009（法定保留和备份 SLA）与 ADR-012（华为云服务拓扑及 PostgreSQL 版本）保持 proposed。
 - 状态、责任角色和截止门禁统一见 [ADR 索引](./adr/README.md)，禁止在本文复制维护另一套状态。
 
 Stage 0 的实际产物和验证状态见 [后端实施计划的 Stage 0](./backend_implementation_plan.md#stage-0文档adropenapi-草案与可行性) 与阶段报告；任何未通过门禁的草案不得被描述为已上线能力。
